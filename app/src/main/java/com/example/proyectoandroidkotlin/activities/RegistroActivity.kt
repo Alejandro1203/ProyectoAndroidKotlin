@@ -437,7 +437,7 @@ class RegistroActivity: AppCompatActivity() {
                     .setMessage(R.string.dialog_aceptar_permiso)
                     .setNegativeButton(R.string.dialog_ajustes) { dialog, which ->
                         intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        var uri =Uri.fromParts("package", packageName, null)
+                        var uri = Uri.fromParts("package", packageName, null)
                         intent.setData(uri)
                         startActivity(intent)
                     }

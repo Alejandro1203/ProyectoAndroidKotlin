@@ -81,4 +81,5 @@
     <string name="usuarios_normales">Usuarios Normales</string>
     <string name="bajas">Bajas</string>
     <string name="seleccionar_todos">Seleccionar todos</string>
+    <string name="bottomsheet">BottomSheet</string>
 </resources>

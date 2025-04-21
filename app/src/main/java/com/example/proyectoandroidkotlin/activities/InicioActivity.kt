@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.proyectoandroidkotlin.databinding.InicioLayoutBinding
 import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.google.android.material.tabs.TabLayoutMediator
 
 class InicioActivity: AppCompatActivity() {
     lateinit var binding: InicioLayoutBinding
@@ -17,6 +18,8 @@ class InicioActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = InicioLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val tabLayout = binding.tabLayout
+        val viewPager = binding.viewpager
         bundleRecogida = intent.extras!!
 
         usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -26,6 +29,8 @@ class InicioActivity: AppCompatActivity() {
             bundleRecogida.getSerializable("usuarioLogin") as EntidadUsuario
         }
 
-        binding.txt.text = "Id: ${usuario.id}"
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+
+        }.attach()
     }
 }

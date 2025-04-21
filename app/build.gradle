@@ -37,7 +37,9 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation libs.recyclerview.v7
+    implementation(libs.circleindicator)
+    implementation libs.play.services.location
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material

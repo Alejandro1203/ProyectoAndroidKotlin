@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/opcionEditar"
+        android:title="@string/dialog_editar"
+        android:icon="@drawable/editar"/>
+
+    <item
+        android:id="@+id/opcionEliminar"
+        android:title="@string/dialog_eliminar"
+        android:icon="@drawable/eliminar"/>
+</menu>

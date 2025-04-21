@@ -1,4 +1,3 @@
 package com.example.proyectoandroidkotlin.entidades
 
-class EntidadImagen {
-}
+data class EntidadImagen(val imagen: String)

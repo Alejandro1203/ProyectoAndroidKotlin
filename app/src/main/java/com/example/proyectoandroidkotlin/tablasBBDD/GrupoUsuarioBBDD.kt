@@ -66,7 +66,7 @@ class GrupoUsuarioBBDD(context: Context): SQLiteOpenHelper(context, "DBGrupoUsua
 
         try {
             this.readableDatabase.use { db ->
-                db.rawQuery(query, null).use { cursor ->
+                db.rawQuery(query, arrayOf(id.toString())).use { cursor ->
                     if (cursor.moveToNext()) {
                         rol = cursor.getString(0)
                     }

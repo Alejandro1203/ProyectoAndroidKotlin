@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        android:padding="5dp"
+        android:elevation="4dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginLeft="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/fotoUsuario"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/border_imageview"
+                android:clipToOutline="true"
+                android:contentDescription="@string/foto_de_usuario"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/txtFijoId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/id"
+                android:textColor="#3A3A3A"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/fotoUsuario"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="10dp"/>
+
+            <TextView
+                android:id="@+id/txtId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_onSurfaceVariant_highContrast"
+                app:layout_constraintStart_toEndOf="@id/txtFijoId"
+                android:layout_marginStart="5dp"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/txtFijoNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mostrar_nombre"
+                android:textColor="#3A3A3A"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/fotoUsuario"
+                app:layout_constraintTop_toBottomOf="@id/txtFijoId"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/txtNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_onSurfaceVariant_highContrast"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="5dp"
+                app:layout_constraintStart_toEndOf="@id/txtFijoNombre"
+                app:layout_constraintTop_toBottomOf="@+id/txtId"/>
+
+            <TextView
+                android:id="@+id/txtFijoRol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rol"
+                android:textColor="#3A3A3A"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/fotoUsuario"
+                app:layout_constraintTop_toBottomOf="@id/txtNombre"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/txtRol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_onSurfaceVariant_highContrast"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="5dp"
+                app:layout_constraintStart_toEndOf="@id/txtFijoRol"
+                app:layout_constraintTop_toBottomOf="@id/txtNombre" />
+
+            <TextView
+                android:id="@+id/txtFijoCorreo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mostrar_correo"
+                android:textColor="#3A3A3A"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/fotoUsuario"
+                app:layout_constraintTop_toBottomOf="@id/txtRol"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/txtCorreo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_onSurfaceVariant_highContrast"
+                app:layout_constraintStart_toEndOf="@id/txtFijoCorreo"
+                app:layout_constraintTop_toBottomOf="@id/txtRol"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="5dp"/>
+
+            <TextView
+                android:id="@+id/txtFijoFechaNacimiento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mostrar_fecha_nacimiento"
+                android:textColor="#3A3A3A"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/fotoUsuario"
+                app:layout_constraintTop_toBottomOf="@id/txtCorreo"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="8dp"
+                />
+
+            <TextView
+                android:id="@+id/txtFechaNacimiento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/md_theme_onSurfaceVariant_highContrast"
+                app:layout_constraintStart_toEndOf="@id/txtFijoFechaNacimiento"
+                app:layout_constraintTop_toBottomOf="@id/txtCorreo"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="5dp"/>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/check"
+                style="@style/Widget.App.CheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
