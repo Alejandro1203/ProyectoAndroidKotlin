@@ -3,34 +3,51 @@ package com.example.proyectoandroidkotlin.activities
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.proyectoandroidkotlin.R
+import com.example.proyectoandroidkotlin.adaptadores.AdaptadorFragmentoListaUsuarios
 import com.example.proyectoandroidkotlin.databinding.InicioLayoutBinding
 import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
 import com.google.android.material.tabs.TabLayoutMediator
 
 class InicioActivity: AppCompatActivity() {
-    lateinit var binding: InicioLayoutBinding
-    lateinit var usuario: EntidadUsuario
-    lateinit var bundleRecogida: Bundle
+    private val binding by lazy { InicioLayoutBinding.inflate(layoutInflater) }
+    private var usuario: EntidadUsuario? = null
+    private var bundleRecogida: Bundle? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = InicioLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val tabLayout = binding.tabLayout
-        val viewPager = binding.viewpager
-        bundleRecogida = intent.extras!!
+        bundleRecogida = intent.extras
 
         usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            bundleRecogida.getSerializable("usuarioLogin", EntidadUsuario::class.java)!!
+            requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", EntidadUsuario::class.java)) {
+                Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+            }
         } else {
             @Suppress("DEPRECATION")
-            bundleRecogida.getSerializable("usuarioLogin") as EntidadUsuario
+            requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as EntidadUsuario) {
+                Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+            }
         }
 
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+        binding.viewpager.adapter = AdaptadorFragmentoListaUsuarios(this, usuario)
+        binding.viewpager.offscreenPageLimit = 3
 
+        TabLayoutMediator(binding.tabLayout, binding.viewpager) { tab, position ->
+
+            if(usuario?.rol == 1) {
+                when (position) {
+                    0 -> tab.text = getString(R.string.administradores)
+                    1 -> tab.text = getString(R.string.usuarios_normales)
+                    2 -> tab.text = getString(R.string.bajas)
+                    else -> tab.text = getString(R.string.administradores)
+                }
+            } else {
+                tab.text = getString(R.string.usuarios_normales)
+            }
         }.attach()
     }
 }
