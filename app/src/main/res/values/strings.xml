@@ -55,9 +55,14 @@
     <string name="metodo_insertarImagenesGaleria">insertarImagenesGaleria</string>
     <string name="metodo_correoExiste">correoExiste</string>
     <string name="metodo_getBajaUsuario">getBajaUsuario</string>
+    <string name="metodo_imageDecoder">Método imageDecoder</string>
+    <string name="metodo_getUriFoto">Método getUriFoto</string>
+    <string name="metodo_getRutaFromUri">Método getRutaFromUri</string>
+
     <string name="error_GrupoUsuario">Error Tabla GrupoUsuario</string>
     <string name="metodo_getAllGrupoUsuarios">getAllGrupoUsuarios</string>
     <string name="no_existe_galeria">No existe galería</string>
+    <string name="no_usuario_bundle">No se encontró usuario en el bundle</string>
 
     <string name="error_longitud_nombre">Nombre demasiado largo (menos de 20 caracteres)</string>
     <string name="error_ingreso">ERROR al ingresar</string>
@@ -68,6 +73,10 @@
     <string name="error_formato_correo">Formato incorreto de correo (@)</string>
     <string name="error_formato_fecha">Formato incorrecto de fecha (dd-MM-yyyy)</string>
     <string name="error_cargando_imagen">No se pudo cargar la imagen</string>
+    <string name="error_clase_InicioActivity">Error clase InicioActivity.kt</string>
+    <string name="error_decodificar_imagen">Error al decodificar imagen</string>
+    <string name="error_uri">Error en la uri</string>
+    <string name="error_ruta_imagen">Error en la ruta imagen</string>
 
     <string name="ya_tengo_cuenta"><u>Ya tengo cuenta. Iniciar sesión.</u></string>
     <string name="no_tengo_cuenta_registrarme"><u>No tengo cuenta. Registrarme.</u></string>

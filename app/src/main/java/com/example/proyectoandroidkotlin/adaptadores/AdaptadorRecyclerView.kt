@@ -5,11 +5,13 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
+import com.example.proyectoandroidkotlin.adaptadores.AdaptadorRecyclerView.ViewHolderUsuario
 import com.example.proyectoandroidkotlin.databinding.UsuarioBinding
 import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
 import com.example.proyectoandroidkotlin.tablasBBDD.GrupoUsuarioBBDD
-import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 
 class AdaptadorRecyclerView(val context: Context,  val listaUsuarios: ArrayList<EntidadUsuario>, val esAdministrador: Boolean, val adaptadorInterfaz: AdaptadorInterfaz): RecyclerView.Adapter<ViewHolderUsuario>() {
 
@@ -40,30 +42,32 @@ class AdaptadorRecyclerView(val context: Context,  val listaUsuarios: ArrayList<
     override fun getItemCount(): Int {
         return listaUsuarios.size
     }
-}
 
-class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {
 
-    fun bindUsuario(usuario: EntidadUsuario, position: Int) {
-        binding.fotoUsuario.setImageBitmap(BitmapFactory.decodeFile(usuario.fotoPerfil))
-        binding.txtId.text = usuario.id.toString()
-        binding.txtNombre.text = usuario.nombre
-        binding.txtRol.text = getRolById(usuario.id)
-        binding.txtCorreo.text = usuario.correo
-        binding.txtFechaNacimiento.text = usuario.fechaNacimiento
+        fun bindUsuario(usuario: EntidadUsuario, position: Int) {
+            binding.fotoUsuario.setImageBitmap(BitmapFactory.decodeFile(usuario.fotoPerfil))
+            binding.fotoUsuario.setImageURI(usuario.fotoPerfil.toUri())
+            binding.txtId.text = usuario.id.toString()
+            binding.txtNombre.text = usuario.nombre
+            binding.txtRol.text = getRolById(usuario.rol)
+            binding.txtCorreo.text = usuario.correo
+            binding.txtFechaNacimiento.text = usuario.fechaNacimiento
 
-        if(!esAdministrador) {
-            binding.check.visibility = GONE
+            if(!esAdministrador) {
+                binding.check.visibility = GONE
+            }
+        }
+
+        private fun getRolById(id: Int): String {
+            val grupoUsuarioBBDD = GrupoUsuarioBBDD(binding.root.context)
+            return grupoUsuarioBBDD.getRolById(id)
         }
     }
 
-    private fun getRolById(id: Int): String {
-        val grupoUsuarioBBDD = GrupoUsuarioBBDD(context)
-        return grupoUsuarioBBDD.getRolById(id)
+    interface AdaptadorInterfaz {
+        fun onClickListener(position: Int)
+        fun onLongClickListener(position: Int): Boolean
     }
 }
 
-interface AdaptadorInterfaz {
-    fun onClickListener(position: Int)
-    fun onLongClickListener(position: Int): Boolean
-}
