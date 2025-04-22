@@ -9,15 +9,14 @@ import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.google.android.material.snackbar.Snackbar
 import kotlin.properties.Delegates
 
-
 class LoginActivity: AppCompatActivity() {
-    lateinit var loginIntent: Intent
-    lateinit var nombre: String
-    lateinit var contrasenya: String
-    var id by Delegates.notNull<Int>()
-    var bundleEnvio = Bundle()
-    var usuarioBBDD = UsuarioBBDD(this)
-    lateinit var binding: LoginLayoutBinding
+    private lateinit var binding: LoginLayoutBinding
+    private var loginIntent: Intent ?= null
+    private var nombre: String = ""
+    private var contrasenya: String = ""
+    private var id by Delegates.notNull<Int>()
+    private var bundleEnvio = Bundle()
+    private var usuarioBBDD = UsuarioBBDD(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,18 +32,18 @@ class LoginActivity: AppCompatActivity() {
 
                     if(id != -1) {
                         if(usuarioBBDD.getBajaUsuario(id)) {
-                            Snackbar.make(binding.snackbar, R.string.cuenta_baja, Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(binding.snackbar, R.string.cuenta_baja, Snackbar.LENGTH_SHORT).show()
                         } else if(usuarioBBDD.ingresarById(id)){
-                            inicioSesion(id);
+                            inicioSesion(id)
                         } else {
-                            Snackbar.make(binding.snackbar, R.string.error_ingreso, Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(binding.snackbar, R.string.error_ingreso, Snackbar.LENGTH_SHORT).show()
                         }
                     } else {
-                        Snackbar.make(binding.snackbar, R.string.error_no_coincide, Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(binding.snackbar, R.string.error_no_coincide, Snackbar.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -66,8 +65,8 @@ class LoginActivity: AppCompatActivity() {
         if(binding.edtNombre.editText?.text.toString().length <= 20) {
             return true
         } else {
-            Snackbar.make(binding.snackbar, R.string.error_longitud_nombre, Snackbar.LENGTH_SHORT).show();
-            return false;
+            Snackbar.make(binding.snackbar, R.string.error_longitud_nombre, Snackbar.LENGTH_SHORT).show()
+            return false
         }
     }
 
@@ -76,7 +75,7 @@ class LoginActivity: AppCompatActivity() {
         bundleEnvio.putSerializable("usuarioLogin", usuarioBBDD.getUsuarioById(id))
         bundleEnvio.putInt("idLogin", id)
         bundleEnvio.putInt("rolLogin", usuarioBBDD.getRolById(id))
-        loginIntent.putExtras(bundleEnvio)
+        loginIntent?.putExtras(bundleEnvio)
         startActivity(loginIntent)
         finish()
     }
