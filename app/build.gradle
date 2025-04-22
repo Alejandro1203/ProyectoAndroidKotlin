@@ -37,7 +37,6 @@ android {
 }
 
 dependencies {
-    implementation libs.recyclerview.v7
     implementation(libs.circleindicator)
     implementation libs.play.services.location
     implementation libs.androidx.core.ktx

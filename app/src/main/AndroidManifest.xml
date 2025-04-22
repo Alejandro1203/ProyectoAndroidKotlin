@@ -29,7 +29,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
-        <activity android:name=".activities.RegistroActivity"/>
+        <activity android:name=".activities.GaleriaActivity"/>
+        <activity android:name=".activities.RegistroActivity" android:configChanges="orientation|screenSize"/>
         <activity android:name=".activities.InicioActivity"/>
         <activity
             android:name=".activities.LoginActivity"

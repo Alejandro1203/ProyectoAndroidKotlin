@@ -6,6 +6,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
@@ -35,7 +36,6 @@ import com.example.proyectoandroidkotlin.entidades.EntidadGrupoUsuario
 import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
 import com.example.proyectoandroidkotlin.tablasBBDD.GrupoUsuarioBBDD
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -56,43 +56,41 @@ import java.util.TimeZone
 
 @SuppressLint("SimpleDateFormat")
 class RegistroActivity: AppCompatActivity() {
-    private val REQUEST_CODE_PERMISO_LOCALIZACION = 100
-    private val REQUEST_CODE_PERMISO_CAMARA = 200
-    private val REQUEST_CODE_PERMISO_GALERIA = 300
-    lateinit var usuario: EntidadUsuario
-    lateinit var usuarioBBDD: UsuarioBBDD
-    lateinit var grupoUsuarioBBDD: GrupoUsuarioBBDD
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    lateinit var listaGrupoUsuario: List<EntidadGrupoUsuario>
-    val formatoUltimaModificacion = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-    val calendar: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"))
-    lateinit var calendarBuilder: CalendarConstraints.Builder
-    lateinit var picker: MaterialDatePicker<Long>
-    var fechaSeleccionada: Long = -1L
-    lateinit var binding: RegistroLayoutBinding
+
+    companion object {
+        private const val REQUEST_CODE_PERMISO_LOCALIZACION = 100
+        private const val REQUEST_CODE_PERMISO_CAMARA = 200
+        private const val REQUEST_CODE_PERMISO_GALERIA = 300
+        private val formatoUltimaModificacion = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+        private val calendar: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"))
+    }
+
+    private lateinit var binding: RegistroLayoutBinding
+    private val usuarioBBDD by lazy { UsuarioBBDD(this) }
+    private val grupoUsuarioBBDD by lazy { GrupoUsuarioBBDD(this) }
+    private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+    private var listaGrupoUsuario: List<EntidadGrupoUsuario> = emptyList()
+    private var fechaSeleccionada: Long = -1L
     lateinit var dialogCamara: MaterialAlertDialogBuilder
-    lateinit var foto: Bitmap
-    lateinit var uriFoto: Uri
-    lateinit var fotoRutaAvatar: String
-    lateinit var fotoRutaGaleria: String
-    lateinit var nombre: String
-    lateinit var correo: String
-    lateinit var fechaNacimiento: String
-    lateinit var contrasenya: String
-    lateinit var rol: String
-    var idRol: Int = -1
-    var baja: Int = 0
-    lateinit var ultimaModificacion: String
-    lateinit var latitud: String
-    lateinit var longitud: String
+    private var foto: Bitmap ?= null
+    private var uriFoto: Uri ?= null
+    private var fotoRutaAvatar: String = ""
+    private var fotoRutaGaleria: String = ""
+    private var nombre: String = ""
+    private var correo: String = ""
+    private var fechaNacimiento: String = ""
+    private var contrasenya: String = ""
+    private var rol: String = ""
+    private var idRol: Int = -1
+    private var baja: Int = 0
+    private var ultimaModificacion: String = ""
+    private var latitud: String = "0.0"
+    private var longitud: String = "0.0"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = RegistroLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        usuarioBBDD = UsuarioBBDD(this)
-        grupoUsuarioBBDD = GrupoUsuarioBBDD(this)
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         rellenarSpinnerRoles()
 
@@ -102,10 +100,9 @@ class RegistroActivity: AppCompatActivity() {
         }
 
         binding.datePicker.setEndIconOnClickListener { v ->
-            calendarBuilder = CalendarConstraints.Builder()
-                .setValidator(DateValidatorPointBackward.now())
+            val calendarBuilder = CalendarConstraints.Builder().setValidator(DateValidatorPointBackward.now())
 
-            picker = MaterialDatePicker.Builder.datePicker()
+            val picker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText(R.string.seleccionar_fecha)
                 .setSelection(if(fechaSeleccionada != -1L) {
                                   fechaSeleccionada
@@ -135,9 +132,7 @@ class RegistroActivity: AppCompatActivity() {
             }
         }
 
-        binding.btnFoto.setOnClickListener { v ->
-            crearDialogCamara()
-        }
+        binding.btnFoto.setOnClickListener { crearDialogCamara() }
 
         binding.btnRegistrar.setOnClickListener {
             if(camposRellenos()) {
@@ -163,14 +158,18 @@ class RegistroActivity: AppCompatActivity() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+    }
+
     private val launcherAvatarCamara: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
 
         if(result.resultCode == RESULT_OK && result.data != null) {
-            foto = result.data?.extras?.get("data") as Bitmap
+            foto = result.data?.extras?.get("data") as? Bitmap
             binding.iconoUsuario.setImageBitmap(foto)
             binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
-            uriFoto = getUriFoto(applicationContext, foto)!!
+            uriFoto = getUriFoto(applicationContext, foto)
             fotoRutaAvatar = getRutaFromUri(uriFoto)!!
         }
     }
@@ -181,7 +180,7 @@ class RegistroActivity: AppCompatActivity() {
         if(result.resultCode == RESULT_OK && result.data != null) {
             uriFoto = result.data!!.data!!
 
-            imageDecoder(uriFoto)
+            uriFoto?.let { imageDecoder(it) }
 
             if(foto != null) {
                 fotoRutaAvatar = getRutaFromUri(uriFoto)!!
@@ -271,30 +270,33 @@ class RegistroActivity: AppCompatActivity() {
             }
         } catch (e: IOException) {
             Toast.makeText(this, R.string.error_cargando_imagen, Toast.LENGTH_SHORT).show()
-            Log.e("Error al decodificar imagen", "Método imageDecoder:$e")
+            Log.e(getString(R.string.error_decodificar_imagen), getString(R.string.metodo_imageDecoder) + ":$e")
         }
     }
 
-    private fun getUriFoto(context: Context, image: Bitmap): Uri? {
-        var values = ContentValues()
-        values.put(MediaStore.Images.Media.DISPLAY_NAME, "imagen_" + System.currentTimeMillis() + ".jpg")
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+    private fun getUriFoto(context: Context, image: Bitmap?): Uri? {
+        var values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "imagen_" + System.currentTimeMillis() + ".jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        }
 
         var imageUri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
 
         try {
-            context.contentResolver.openOutputStream(imageUri!!).use { outputStream ->
-                image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream!!)
+            if (image != null) {
+                imageUri?.let { context.contentResolver.openOutputStream(it) }.use { outputStream ->
+                    image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream!!)
+                }
             }
         } catch (e: IOException) {
-            Log.e("Error en la uri", "Método getUriFoto:$e")
+            Log.e(getString(R.string.error_uri), getString(R.string.metodo_getUriFoto) + ":$e")
         }
 
         return imageUri
     }
 
-    private fun getRutaFromUri(uri: Uri): String? {
+    private fun getRutaFromUri(uri: Uri?): String? {
         var nombreArchivo = "imagen_" + System.currentTimeMillis() + ".jpg"
         var directorioDestino = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "imagenes")
 
@@ -305,7 +307,7 @@ class RegistroActivity: AppCompatActivity() {
         var archivoDestino = File(directorioDestino, nombreArchivo)
 
         try {
-            contentResolver.openInputStream(uri).use { inputStream ->
+            uri?.let { contentResolver.openInputStream(it) }.use { inputStream ->
                 FileOutputStream(archivoDestino).use { outputStream ->
                     var buffer = ByteArray(4096)
                     var bytesRead: Int = -1
@@ -318,13 +320,13 @@ class RegistroActivity: AppCompatActivity() {
                 }
             }
         } catch (e: IOException) {
-            Log.e("Error en la ruta imagen", "Método getRutaFromUri:$e")
+            Log.e(getString(R.string.error_ruta_imagen),  getString(R.string.metodo_getRutaFromUri) + ":$e")
             return null
         }
     }
 
     private fun crearDialogCamara() {
-        dialogCamara = MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(this)
             .setMessage(R.string.elegir_foto)
             .setNeutralButton(R.string.dialog_cancelar, null)
             .setPositiveButton("") { dialog, which ->
@@ -342,9 +344,7 @@ class RegistroActivity: AppCompatActivity() {
                 }
             }
             .setNegativeButtonIcon(ContextCompat.getDrawable(this, R.drawable.galeria))
-            .setPositiveButtonIcon(ContextCompat.getDrawable(this, R.drawable.camara))
-
-        dialogCamara.show()
+            .setPositiveButtonIcon(ContextCompat.getDrawable(this, R.drawable.camara)).show()
     }
 
     private fun getLocalizacion(): Boolean {
@@ -356,9 +356,6 @@ class RegistroActivity: AppCompatActivity() {
                     if(location != null) {
                         latitud = location.latitude.toString()
                         longitud = location.longitude.toString()
-                    } else {
-                        latitud = "0.0"
-                        longitud = "0.0"
                     }
                 }
             localizacionConseguida = true
@@ -372,7 +369,7 @@ class RegistroActivity: AppCompatActivity() {
     private fun localizacionConseguida() {
         binding.btnRegistrar.isEnabled = false
         Handler(Looper.getMainLooper()).postDelayed( {
-            usuario = EntidadUsuario(nombre, correo, contrasenya, fechaNacimiento, idRol, fotoRutaAvatar, baja, "", ultimaModificacion, latitud, longitud)
+            val usuario = EntidadUsuario(nombre, correo, contrasenya, fechaNacimiento, idRol, fotoRutaAvatar, baja, "", ultimaModificacion, latitud, longitud)
 
             if(usuarioBBDD.insertarUsuario(usuario)) {
                 startActivity(Intent(this, LoginActivity::class.java))
