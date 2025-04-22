@@ -1,6 +1,5 @@
 package com.example.proyectoandroidkotlin.activities
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -16,10 +15,11 @@ class InicioActivity: AppCompatActivity() {
     private var usuario: EntidadUsuario? = null
     private var bundleRecogida: Bundle? = null
 
-    @SuppressLint("SetTextI18n")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
         bundleRecogida = intent.extras
 
         usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

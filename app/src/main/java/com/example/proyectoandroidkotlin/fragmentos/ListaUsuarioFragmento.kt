@@ -1,13 +1,18 @@
 package com.example.proyectoandroidkotlin.fragmentos
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.proyectoandroidkotlin.activities.RegistroActivity
 import com.example.proyectoandroidkotlin.adaptadores.AdaptadorRecyclerView.AdaptadorInterfaz
 import com.example.proyectoandroidkotlin.adaptadores.AdaptadorRecyclerView
 import com.example.proyectoandroidkotlin.databinding.RecyclerBinding
@@ -21,6 +26,8 @@ class ListaUsuarioFragmento: Fragment() {
     private var listaUsuarios: ArrayList<EntidadUsuario> = arrayListOf()
     private var userType: String = ""
     private var usuario: EntidadUsuario ?= null
+    private var usuarioLogin: EntidadUsuario ?= null
+    private var bundleEnvio: Bundle = Bundle()
 
     fun newInstance(userType: String, usuario: EntidadUsuario?): ListaUsuarioFragmento {
         var fragmento = ListaUsuarioFragmento()
@@ -38,7 +45,7 @@ class ListaUsuarioFragmento: Fragment() {
         if(arguments != null) {
             userType = requireArguments().getString("USER_TYPE", "")
 
-            usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            usuarioLogin = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 arguments?.getSerializable("USUARIO", EntidadUsuario::class.java)!!
             } else {
                 @Suppress("DEPRECATION")
@@ -68,13 +75,20 @@ class ListaUsuarioFragmento: Fragment() {
     }
 
     private fun updateRecyclerView() {
-        adaptadorRecyclerView = AdaptadorRecyclerView(requireContext(), listaUsuarios, true, object : AdaptadorInterfaz {
+        adaptadorRecyclerView = AdaptadorRecyclerView(requireContext(), listaUsuarios, usuarioLogin?.rol == 1, object : AdaptadorInterfaz {
             override fun onClickListener(position: Int) {
-                TODO("Not yet implemented")
+                usuario = listaUsuarios[position]
+
+                if(usuario?.id == usuarioLogin?.id) {
+                    launcherEditar.launch(intentEditar())
+                }
             }
 
             override fun onLongClickListener(position: Int): Boolean {
-                TODO("Not yet implemented")
+                usuario = listaUsuarios[position]
+                launcherEditar.launch(intentEditar())
+
+                return true
             }
         })
 
@@ -84,4 +98,20 @@ class ListaUsuarioFragmento: Fragment() {
             adapter = adaptadorRecyclerView
         }
     }
+
+    private fun intentEditar(): Intent {
+        var intentEditar = Intent(context, RegistroActivity::class.java)
+        bundleEnvio.putSerializable("usuarioEditar", usuario)
+        bundleEnvio.putSerializable("usuarioEditor", usuarioLogin)
+        intentEditar.putExtras(bundleEnvio)
+
+        return intentEditar
+    }
+
+    private val launcherEditar: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+            if(result.resultCode == RESULT_OK && result.data != null) {
+                updateRecyclerView()
+            }
+        }
 }

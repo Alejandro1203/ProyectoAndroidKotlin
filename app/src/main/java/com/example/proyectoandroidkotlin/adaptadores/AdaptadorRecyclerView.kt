@@ -46,7 +46,7 @@ class AdaptadorRecyclerView(val context: Context,  val listaUsuarios: ArrayList<
     inner class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {
 
         fun bindUsuario(usuario: EntidadUsuario, position: Int) {
-            binding.fotoUsuario.setImageBitmap(BitmapFactory.decodeFile(usuario.fotoPerfil))
+//            binding.fotoUsuario.setImageBitmap(BitmapFactory.decodeFile(usuario.fotoPerfil))
             binding.fotoUsuario.setImageURI(usuario.fotoPerfil.toUri())
             binding.txtId.text = usuario.id.toString()
             binding.txtNombre.text = usuario.nombre

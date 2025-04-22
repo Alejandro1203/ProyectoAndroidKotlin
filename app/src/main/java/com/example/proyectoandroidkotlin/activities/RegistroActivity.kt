@@ -21,6 +21,8 @@ import android.provider.Settings
 import android.util.Log
 import android.util.Patterns
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -30,6 +32,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.databinding.RegistroLayoutBinding
 import com.example.proyectoandroidkotlin.entidades.EntidadGrupoUsuario
@@ -58,6 +61,8 @@ import java.util.TimeZone
 class RegistroActivity: AppCompatActivity() {
 
     companion object {
+        private const val REQUEST_CODE_DIALOG_CAMARA = 2000
+        private const val REQUEST_CODE_DIALOG_GALERIA = 3000
         private const val REQUEST_CODE_PERMISO_LOCALIZACION = 100
         private const val REQUEST_CODE_PERMISO_CAMARA = 200
         private const val REQUEST_CODE_PERMISO_GALERIA = 300
@@ -69,13 +74,14 @@ class RegistroActivity: AppCompatActivity() {
     private val usuarioBBDD by lazy { UsuarioBBDD(this) }
     private val grupoUsuarioBBDD by lazy { GrupoUsuarioBBDD(this) }
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+    private var bundleRecogida: Bundle ?= null
     private var listaGrupoUsuario: List<EntidadGrupoUsuario> = emptyList()
     private var fechaSeleccionada: Long = -1L
-    lateinit var dialogCamara: MaterialAlertDialogBuilder
+//    lateinit var dialogCamara: MaterialAlertDialogBuilder
     private var foto: Bitmap ?= null
     private var uriFoto: Uri ?= null
     private var fotoRutaAvatar: String = ""
-    private var fotoRutaGaleria: String = ""
+//    private var fotoRutaGaleria: String = ""
     private var nombre: String = ""
     private var correo: String = ""
     private var fechaNacimiento: String = ""
@@ -86,6 +92,8 @@ class RegistroActivity: AppCompatActivity() {
     private var ultimaModificacion: String = ""
     private var latitud: String = "0.0"
     private var longitud: String = "0.0"
+    private var usuarioEditar: EntidadUsuario ?= null
+    private var usuarioEditor: EntidadUsuario ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +101,53 @@ class RegistroActivity: AppCompatActivity() {
         setContentView(binding.root)
 
         rellenarSpinnerRoles()
+
+        bundleRecogida = intent.extras
+
+        if(bundleRecogida != null) {
+            usuarioEditor = bundleRecogida?.getSerializable("usuarioEditor") as EntidadUsuario
+            usuarioEditar = bundleRecogida?.getSerializable("usuarioEditar") as EntidadUsuario
+
+            setVistaEdicion()
+
+            binding.iconoUsuario.setOnClickListener {  }
+
+            binding.btnMapa.setOnClickListener {
+                abrirMapa()
+            }
+
+            binding.btnFoto.setOnClickListener {
+                crearDialogOpcionesImagenes()
+            }
+
+            binding.btnRegistrar.setOnClickListener {  }
+
+        } else {
+            binding.btnFoto.setOnClickListener { crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA) }
+
+            binding.btnRegistrar.setOnClickListener {
+                if(camposRellenos()) {
+                    nombre = binding.edtNombre.editText?.text.toString().trim()
+                    correo = binding.edtCorreo.editText?.text.toString().trim()
+                    fechaNacimiento = binding.datePicker.editText?.text.toString().trim()
+
+                    if(validarCampos(nombre, correo, fechaNacimiento)) {
+                        if(usuarioBBDD.correoExiste(correo)) {
+                            Snackbar.make(binding.snackbar, R.string.error_correo, Snackbar.LENGTH_SHORT).show()
+                        } else {
+                            contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
+                            ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
+
+                            if(getLocalizacion()) {
+                                localizacionConseguida()
+                            }
+                        }
+                    }
+                } else {
+                    Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         binding.txtIniciado.setOnClickListener { v ->
             startActivity(Intent(this, LoginActivity::class.java))
@@ -131,31 +186,6 @@ class RegistroActivity: AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
         }
-
-        binding.btnFoto.setOnClickListener { crearDialogCamara() }
-
-        binding.btnRegistrar.setOnClickListener {
-            if(camposRellenos()) {
-                nombre = binding.edtNombre.editText?.text.toString().trim()
-                correo = binding.edtCorreo.editText?.text.toString().trim()
-                fechaNacimiento = binding.datePicker.editText?.text.toString().trim()
-
-                if(validarCampos(nombre, correo, fechaNacimiento)) {
-                    if(usuarioBBDD.correoExiste(correo)) {
-                        Snackbar.make(binding.snackbar, R.string.error_correo, Snackbar.LENGTH_SHORT).show()
-                    } else {
-                        contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
-                        ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
-
-                        if(getLocalizacion()) {
-                            localizacionConseguida()
-                        }
-                    }
-                }
-            } else {
-                Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show()
-            }
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -170,27 +200,43 @@ class RegistroActivity: AppCompatActivity() {
             binding.iconoUsuario.setImageBitmap(foto)
             binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
             uriFoto = getUriFoto(applicationContext, foto)
-            fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+            if (getRutaFromUri(uriFoto) != null) {
+                fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+            }
         }
     }
 
     private val launcherAvatarGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
 
-        if(result.resultCode == RESULT_OK && result.data != null) {
-            uriFoto = result.data!!.data!!
+        if(result.resultCode == RESULT_OK && result.data != null && result.data!!.data != null ) {
+            uriFoto = result.data!!.data
 
             uriFoto?.let { imageDecoder(it) }
 
             if(foto != null) {
-                fotoRutaAvatar = getRutaFromUri(uriFoto)!!
-                binding.iconoUsuario.setImageBitmap(BitmapFactory.decodeFile(fotoRutaAvatar))
-                binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
+                if (getRutaFromUri(uriFoto) != null) {
+                    fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+                    binding.iconoUsuario.setImageBitmap(BitmapFactory.decodeFile(fotoRutaAvatar))
+                    binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
+                }
+
             } else {
                 Toast.makeText(this, R.string.error_cargando_imagen, Toast.LENGTH_SHORT).show()
             }
         }
     }
+
+    private val launcherGaleriaCamara: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+
+    }
+
+    private val launcherGaleriaGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+
+    }
+
 
     private fun camposRellenos(): Boolean {
         return binding.edtNombre.editText?.text.toString().trim().isNotEmpty() &&
@@ -221,7 +267,7 @@ class RegistroActivity: AppCompatActivity() {
     private fun validarFechaNacimiento(fecha: String): Boolean {
 
         try {
-            LocalDate.parse(fecha, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            LocalDate.parse(fecha, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
             return true
         } catch (e: DateTimeParseException) {
             Snackbar.make(binding.snackbar, R.string.error_formato_fecha, Snackbar.LENGTH_SHORT).show()
@@ -325,26 +371,78 @@ class RegistroActivity: AppCompatActivity() {
         }
     }
 
-    private fun crearDialogCamara() {
+    private fun setVistaEdicion() {
+        binding.txtUltimaModificacion.visibility = VISIBLE
+        binding.btnMapa.visibility = VISIBLE
+        binding.txtIniciado.visibility = GONE
+
+        if(usuarioEditor?.rol == 2 || (usuarioEditor == usuarioEditar)) {
+            binding.spinner.visibility = GONE
+            binding.switchBaja.visibility = GONE
+        } else if(usuarioEditor?.rol == 1) {
+            binding.switchBaja.visibility = VISIBLE
+            binding.switchBaja.isChecked = usuarioEditar?.baja == 1
+        }
+
+        binding.iconoUsuario.setImageURI(usuarioEditar?.fotoPerfil?.toUri())
+        binding.txtUltimaModificacion.text = usuarioEditar?.ultimaModificacion
+        binding.edtNombre.editText?.setText(usuarioEditar?.nombre)
+        binding.edtCorreo.editText?.setText(usuarioEditar?.correo)
+        binding.edtContrasenya.editText?.setText(usuarioEditar?.contrasenya)
+        binding.datePicker.editText?.setText(usuarioEditar?.fechaNacimiento)
+        usuarioEditar?.rol?.let { binding.spinner.setSelection(it - 1) }
+        binding.btnRegistrar.text = getString(R.string.btn_actualizar)
+    }
+
+    private fun crearDialogCamara(requestCode: Int) {
         MaterialAlertDialogBuilder(this)
             .setMessage(R.string.elegir_foto)
             .setNeutralButton(R.string.dialog_cancelar, null)
             .setPositiveButton("") { dialog, which ->
                 if(tienePermisoCamara()) {
-                    abrirCamara()
+                    abrirCamara(requestCode)
                 } else {
                     pedirPermisoCamara()
                 }
             }
             .setNegativeButton("") { dialog, which ->
                 if(tienePermidoGaleria()) {
-                    abrirGaleria()
+                    abrirGaleria(requestCode)
                 } else {
                     pedirPermisoGaleria()
                 }
             }
             .setNegativeButtonIcon(ContextCompat.getDrawable(this, R.drawable.galeria))
-            .setPositiveButtonIcon(ContextCompat.getDrawable(this, R.drawable.camara)).show()
+            .setPositiveButtonIcon(ContextCompat.getDrawable(this, R.drawable.camara))
+            .show()
+    }
+
+    private fun crearDialogOpcionesImagenes() {
+        MaterialAlertDialogBuilder(this)
+            .setMessage(R.string.messageDialogUsuario)
+            .setNeutralButton(R.string.dialog_cancelar, null)
+            .setPositiveButton(R.string.insertar_galeria) { dialog, which ->
+                crearDialogCamara(REQUEST_CODE_DIALOG_GALERIA)
+            }
+            .setNegativeButton(R.string.cambiar_foto) { dialog, which ->
+                crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA)
+            }
+            .show()
+    }
+
+    private fun abrirMapa() {
+        val intentUri = "google.streetview:cbll=${usuarioEditar?.latitud},${usuarioEditar?.longitud}".toUri()
+        val intentMapa = Intent(Intent.ACTION_VIEW, intentUri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+
+        if(intentMapa.resolveActivity(packageManager) != null) {
+            startActivity(intentMapa)
+        } else {
+            val webUri = "https://www.google.com/maps/@${usuarioEditar?.latitud},${usuarioEditar?.longitud},15z".toUri()
+            val webIntent = Intent(Intent.ACTION_VIEW, webUri)
+            startActivity(webIntent)
+        }
     }
 
     private fun getLocalizacion(): Boolean {
@@ -381,15 +479,29 @@ class RegistroActivity: AppCompatActivity() {
         }, 2000)
     }
 
-    private fun abrirCamara() {
-        launcherAvatarCamara.launch(Intent(MediaStore.ACTION_IMAGE_CAPTURE))
+    private fun abrirCamara(requestCode: Int) {
+        intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
+            launcherAvatarCamara.launch(intent)
+        } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA){
+            launcherGaleriaCamara.launch(intent)
+        }
+
     }
 
-    private fun abrirGaleria() {
-        intent = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-        intent.setType("image/*")
-        intent.setAction(Intent.ACTION_GET_CONTENT)
-        launcherAvatarGaleria.launch(intent)
+    private fun abrirGaleria(requestCode: Int) {
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI).apply {
+            setType("image/*")
+            setAction(Intent.ACTION_GET_CONTENT)
+        }
+
+        if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
+            launcherAvatarGaleria.launch(intent)
+        } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA) {
+            launcherGaleriaGaleria.launch(intent)
+        }
+
     }
 
     private fun pedirPermisoLocalizacion() {
@@ -414,9 +526,9 @@ class RegistroActivity: AppCompatActivity() {
 
     private fun tienePermidoGaleria(): Boolean {
         return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED;
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
         } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -442,9 +554,9 @@ class RegistroActivity: AppCompatActivity() {
                     .show()
             }
         } else if(requestCode == REQUEST_CODE_PERMISO_CAMARA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            abrirCamara()
+            abrirCamara(REQUEST_CODE_DIALOG_CAMARA)
         } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            abrirGaleria()
+            abrirGaleria(REQUEST_CODE_DIALOG_GALERIA)
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
