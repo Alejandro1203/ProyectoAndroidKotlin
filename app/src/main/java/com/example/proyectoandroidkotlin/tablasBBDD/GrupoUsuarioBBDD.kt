@@ -7,23 +7,27 @@ import android.util.Log
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.entidades.EntidadGrupoUsuario
 
-class GrupoUsuarioBBDD(context: Context): SQLiteOpenHelper(context, "DBGrupoUsuario", null, 1) {
-    private val BBDD_NOMBRE = "DBGrupoUsuario"
-    private val BBDD_VERSION = 1
-    private val TABLA_NOMBRE = "Grupo_Usuario"
-    private val CAMPO_ID = "id"
-    private val CAMPO_ROL = "rol"
-    private lateinit var query: String
-    private lateinit var context: Context
+class GrupoUsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMBRE, null, DATABASE_VERSION) {
 
-    private val sqlCreate = "CREATE TABLE IF NOT EXISTS " + TABLA_NOMBRE + "(" +
-                             CAMPO_ID + " INTEGER PRIMARY KEY," +
-                             CAMPO_ROL + " TEXT" +
-                             ");"
+    companion object {
+        private const val DATABASE_NOMBRE = "DBGrupoUsuario"
+        private const val DATABASE_VERSION = 1
+        private const val TABLA_NOMBRE = "Grupo_Usuario"
+        private const val COLUMNA_ID = "id"
+        private const val COLUMNA_ROL = "rol"
+    }
 
-    private val sqlInsert = "INSERT OR REPLACE INTO " + TABLA_NOMBRE +
-                            "(" + CAMPO_ID + "," + CAMPO_ROL + ") " +
-                            "VALUES (1, 'Administrador'), (2, 'Usuario Normal');"
+    private val sqlCreate = """
+        CREATE TABLE IF NOT EXISTS $TABLA_NOMBRE (
+            $COLUMNA_ID INTEGER PRIMARY KEY,
+            $COLUMNA_ROL TEXT
+        );
+    """.trimIndent()
+
+    private val sqlInsert = """
+        INSERT OR REPLACE INTO $TABLA_NOMBRE($COLUMNA_ID, $COLUMNA_ROL)
+        VALUES (1, 'Administrador'), (2, 'Usuario Normal');
+    """.trimIndent()
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(sqlCreate)
@@ -31,22 +35,20 @@ class GrupoUsuarioBBDD(context: Context): SQLiteOpenHelper(context, "DBGrupoUsua
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $BBDD_NOMBRE")
-        db.execSQL(sqlCreate)
-        db.execSQL(sqlInsert)
+        db.execSQL("DROP TABLE IF EXISTS $TABLA_NOMBRE")
+        onCreate(db)
     }
 
     fun getAllGrupoUsuarios(): List<EntidadGrupoUsuario> {
-        var gruposUsuario = arrayListOf<EntidadGrupoUsuario>()
+        val gruposUsuario = mutableListOf<EntidadGrupoUsuario>()
         var nuevoGrupo: EntidadGrupoUsuario
-        query = "SELECT * " +
-                "FROM $TABLA_NOMBRE"
+        val query = "SELECT * FROM $TABLA_NOMBRE"
 
         try {
-            this.readableDatabase.use { db ->
+            readableDatabase.use { db ->
                 db.rawQuery(query, null).use { cursor ->
                     while (cursor.moveToNext()) {
-                        nuevoGrupo = EntidadGrupoUsuario(cursor.getInt(0), cursor.getString(1))
+                        nuevoGrupo = EntidadGrupoUsuario(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_ROL)))
                         gruposUsuario.add(nuevoGrupo)
                     }
                 }
@@ -60,15 +62,13 @@ class GrupoUsuarioBBDD(context: Context): SQLiteOpenHelper(context, "DBGrupoUsua
 
     fun getRolById(id: Int): String {
         var rol = ""
-        query = "SELECT " + CAMPO_ROL +
-                " FROM " + TABLA_NOMBRE +
-                " WHERE " + CAMPO_ID + "= ?"
+        val query = "SELECT $COLUMNA_ROL FROM $TABLA_NOMBRE WHERE $COLUMNA_ID= ?"
 
         try {
-            this.readableDatabase.use { db ->
+            readableDatabase.use { db ->
                 db.rawQuery(query, arrayOf(id.toString())).use { cursor ->
-                    if (cursor.moveToNext()) {
-                        rol = cursor.getString(0)
+                    if (cursor.moveToFirst()) {
+                        rol = cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_ROL))
                     }
                 }
             }
