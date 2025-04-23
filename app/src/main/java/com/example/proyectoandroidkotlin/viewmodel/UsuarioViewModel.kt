@@ -4,19 +4,19 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 
-class ViewModelUsuario: ViewModel() {
-    private var listaUsuarios = MutableLiveData<List<EntidadUsuario>>()
+class UsuarioViewModel: ViewModel() {
+    private var listaUsuarios = MutableLiveData<List<UsuarioEntidad>>()
 
-    fun getListaUsuarios(): LiveData<List<EntidadUsuario>> {
+    fun getListaUsuarios(): LiveData<List<UsuarioEntidad>> {
         return listaUsuarios
     }
 
     fun cargarListaUsuarios(userType: String, context: Context) {
         val usuarioBBDD = UsuarioBBDD(context)
-        var usuario: List<EntidadUsuario> = emptyList()
+        var usuario: List<UsuarioEntidad> = emptyList()
 
         when(userType) {
             "ADMIN" -> usuario = usuarioBBDD.getAllUsuariosByRol(1)

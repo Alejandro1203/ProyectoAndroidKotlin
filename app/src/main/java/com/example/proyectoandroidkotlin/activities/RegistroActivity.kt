@@ -35,8 +35,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.databinding.RegistroLayoutBinding
-import com.example.proyectoandroidkotlin.entidades.EntidadGrupoUsuario
-import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.example.proyectoandroidkotlin.entidades.GrupoUsuarioEntidad
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.GrupoUsuarioBBDD
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.google.android.gms.location.LocationServices
@@ -75,7 +75,7 @@ class RegistroActivity: AppCompatActivity() {
     private val grupoUsuarioBBDD by lazy { GrupoUsuarioBBDD(this) }
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
     private var bundleRecogida: Bundle ?= null
-    private var listaGrupoUsuario: List<EntidadGrupoUsuario> = emptyList()
+    private var listaGrupoUsuario: List<GrupoUsuarioEntidad> = emptyList()
     private var fechaSeleccionada: Long = -1L
 //    lateinit var dialogCamara: MaterialAlertDialogBuilder
     private var foto: Bitmap ?= null
@@ -92,8 +92,8 @@ class RegistroActivity: AppCompatActivity() {
     private var ultimaModificacion: String = ""
     private var latitud: String = "0.0"
     private var longitud: String = "0.0"
-    private var usuarioEditar: EntidadUsuario ?= null
-    private var usuarioEditor: EntidadUsuario ?= null
+    private var usuarioEditar: UsuarioEntidad ?= null
+    private var usuarioEditor: UsuarioEntidad ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,8 +105,8 @@ class RegistroActivity: AppCompatActivity() {
         bundleRecogida = intent.extras
 
         if(bundleRecogida != null) {
-            usuarioEditor = bundleRecogida?.getSerializable("usuarioEditor") as EntidadUsuario
-            usuarioEditar = bundleRecogida?.getSerializable("usuarioEditar") as EntidadUsuario
+            usuarioEditor = bundleRecogida?.getSerializable("usuarioEditor") as UsuarioEntidad
+            usuarioEditar = bundleRecogida?.getSerializable("usuarioEditar") as UsuarioEntidad
 
             setVistaEdicion()
 
@@ -467,7 +467,7 @@ class RegistroActivity: AppCompatActivity() {
     private fun localizacionConseguida() {
         binding.btnRegistrar.isEnabled = false
         Handler(Looper.getMainLooper()).postDelayed( {
-            val usuario = EntidadUsuario(nombre, correo, contrasenya, fechaNacimiento, idRol, fotoRutaAvatar, baja, "", ultimaModificacion, latitud, longitud)
+            val usuario = UsuarioEntidad(nombre, correo, contrasenya, fechaNacimiento, idRol, fotoRutaAvatar, baja, "", ultimaModificacion, latitud, longitud)
 
             if(usuarioBBDD.insertarUsuario(usuario)) {
                 startActivity(Intent(this, LoginActivity::class.java))

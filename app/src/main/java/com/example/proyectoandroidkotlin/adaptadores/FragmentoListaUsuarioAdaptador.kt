@@ -3,10 +3,10 @@ package com.example.proyectoandroidkotlin.adaptadores
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.fragmentos.ListaUsuarioFragmento
 
-class AdaptadorFragmentoListaUsuarios(activity: FragmentActivity, var usuarioLogin: EntidadUsuario?): FragmentStateAdapter(activity) {
+class FragmentoListaUsuarioAdaptador(activity: FragmentActivity, var usuarioLogin: UsuarioEntidad?): FragmentStateAdapter(activity) {
     private val listaUsuarioString = arrayListOf<String>("ADMIN", "NORMAL", "BAJA")
 
     override fun createFragment(position: Int): Fragment {

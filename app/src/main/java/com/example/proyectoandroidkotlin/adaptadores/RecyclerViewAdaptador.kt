@@ -1,19 +1,18 @@
 package com.example.proyectoandroidkotlin.adaptadores
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
-import com.example.proyectoandroidkotlin.adaptadores.AdaptadorRecyclerView.ViewHolderUsuario
+import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador.ViewHolderUsuario
 import com.example.proyectoandroidkotlin.databinding.UsuarioBinding
-import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.GrupoUsuarioBBDD
 import androidx.core.net.toUri
 
-class AdaptadorRecyclerView(val context: Context,  val listaUsuarios: ArrayList<EntidadUsuario>, val esAdministrador: Boolean, val adaptadorInterfaz: AdaptadorInterfaz): RecyclerView.Adapter<ViewHolderUsuario>() {
+class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<UsuarioEntidad>, val esAdministrador: Boolean, val adaptadorInterfaz: AdaptadorInterfaz): RecyclerView.Adapter<ViewHolderUsuario>() {
 
     override fun onCreateViewHolder(parent: ViewGroup,viewType: Int): ViewHolderUsuario {
         val binding = UsuarioBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -45,8 +44,7 @@ class AdaptadorRecyclerView(val context: Context,  val listaUsuarios: ArrayList<
 
     inner class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {
 
-        fun bindUsuario(usuario: EntidadUsuario, position: Int) {
-//            binding.fotoUsuario.setImageBitmap(BitmapFactory.decodeFile(usuario.fotoPerfil))
+        fun bindUsuario(usuario: UsuarioEntidad, position: Int) {
             binding.fotoUsuario.setImageURI(usuario.fotoPerfil.toUri())
             binding.txtId.text = usuario.id.toString()
             binding.txtNombre.text = usuario.nombre

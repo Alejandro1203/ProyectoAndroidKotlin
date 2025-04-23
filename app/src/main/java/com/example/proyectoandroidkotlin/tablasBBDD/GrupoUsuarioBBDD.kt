@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.proyectoandroidkotlin.R
-import com.example.proyectoandroidkotlin.entidades.EntidadGrupoUsuario
+import com.example.proyectoandroidkotlin.entidades.GrupoUsuarioEntidad
 
 class GrupoUsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMBRE, null, DATABASE_VERSION) {
 
@@ -39,16 +39,16 @@ class GrupoUsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE
         onCreate(db)
     }
 
-    fun getAllGrupoUsuarios(): List<EntidadGrupoUsuario> {
-        val gruposUsuario = mutableListOf<EntidadGrupoUsuario>()
-        var nuevoGrupo: EntidadGrupoUsuario
+    fun getAllGrupoUsuarios(): List<GrupoUsuarioEntidad> {
+        val gruposUsuario = mutableListOf<GrupoUsuarioEntidad>()
+        var nuevoGrupo: GrupoUsuarioEntidad
         val query = "SELECT * FROM $TABLA_NOMBRE"
 
         try {
             readableDatabase.use { db ->
                 db.rawQuery(query, null).use { cursor ->
                     while (cursor.moveToNext()) {
-                        nuevoGrupo = EntidadGrupoUsuario(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_ROL)))
+                        nuevoGrupo = GrupoUsuarioEntidad(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_ROL)))
                         gruposUsuario.add(nuevoGrupo)
                     }
                 }

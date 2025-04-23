@@ -2,7 +2,7 @@ package com.example.proyectoandroidkotlin.entidades
 
 import java.io.Serializable
 
-data class EntidadUsuario(var id: Int = 0, var nombre: String, var correo: String, var contrasenya: String, var fechaNacimiento: String, var rol: Int,
+data class UsuarioEntidad(var id: Int = 0, var nombre: String, var correo: String, var contrasenya: String, var fechaNacimiento: String, var rol: Int,
                           var fotoPerfil: String, var baja: Int, var galeria: String, var ultimaModificacion: String, var latitud: String, var longitud: String) : Serializable {
 
     constructor(nombre: String, correo: String, contrasenya: String, fechaNacimiento: String, rol: Int, fotoPerfil: String, baja: Int, galeria: String,

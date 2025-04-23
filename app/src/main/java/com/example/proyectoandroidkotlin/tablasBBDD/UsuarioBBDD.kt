@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.proyectoandroidkotlin.R
-import com.example.proyectoandroidkotlin.entidades.EntidadUsuario
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 
 class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMBRE, null, DATABASE_VERSION) {
 
@@ -34,8 +34,8 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
     private var valores: ContentValues ?= null
     private var whereClause: String ?= null
     private var whereArgs: Array<String> = emptyArray()
-    private var listaUsuarios: ArrayList<EntidadUsuario> = arrayListOf()
-    private var usuario: EntidadUsuario ?= null
+    private var listaUsuarios: ArrayList<UsuarioEntidad> = arrayListOf()
+    private var usuario: UsuarioEntidad ?= null
 
     private val sqlInsert = """
         CREATE TABLE $TABLA_NOMBRE (
@@ -64,8 +64,8 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         onCreate(db)
     }
 
-    private fun crearUsuarioByCursor(cursor: Cursor): EntidadUsuario {
-        return EntidadUsuario(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_NOMBRE)),
+    private fun crearUsuarioByCursor(cursor: Cursor): UsuarioEntidad {
+        return UsuarioEntidad(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_NOMBRE)),
                               cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_CORREO)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_CONTRASENYA)),
                               cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_FECHA_NACIMIENTO)), cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_ROL)),
                               cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_FOTO_PERFIL)), cursor.getInt(cursor.getColumnIndexOrThrow(COLUMNA_BAJA)),
@@ -73,7 +73,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
                               cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_LATITUD)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_LONGITUD)))
     }
 
-    private fun setContentValueByUsuario(usuario: EntidadUsuario) {
+    private fun setContentValueByUsuario(usuario: UsuarioEntidad) {
         valores = ContentValues().apply {
             put(COLUMNA_NOMBRE, usuario.nombre)
             put(COLUMNA_CORREO, usuario.correo)
@@ -89,7 +89,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         }
     }
 
-    fun getAllUsuarios(): ArrayList<EntidadUsuario> {
+    fun getAllUsuarios(): ArrayList<UsuarioEntidad> {
         val query = "SELECT * FROM $TABLA_NOMBRE"
 
         try {
@@ -107,7 +107,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         return listaUsuarios
     }
 
-    fun getAllUsuariosBaja(): ArrayList<EntidadUsuario> {
+    fun getAllUsuariosBaja(): ArrayList<UsuarioEntidad> {
         val query = "SELECT * FROM $TABLA_NOMBRE WHERE $COLUMNA_BAJA=1"
 
         try {
@@ -125,7 +125,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         return listaUsuarios
     }
 
-    fun getAllUsuariosByRol(rol: Int): ArrayList<EntidadUsuario> {
+    fun getAllUsuariosByRol(rol: Int): ArrayList<UsuarioEntidad> {
         val query = "SELECT * FROM $TABLA_NOMBRE WHERE $COLUMNA_ROL= ? AND $COLUMNA_BAJA = 0"
 
         try {
@@ -143,7 +143,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         return listaUsuarios
     }
 
-    fun getUsuarioById(id: Int): EntidadUsuario? {
+    fun getUsuarioById(id: Int): UsuarioEntidad? {
         val query = "SELECT * FROM $TABLA_NOMBRE WHERE $COLUMNA_ID= ?"
 
         try {
@@ -220,7 +220,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         }
     }
 
-    fun insertarUsuario(usuario: EntidadUsuario): Boolean {
+    fun insertarUsuario(usuario: UsuarioEntidad): Boolean {
 
         try {
             writableDatabase.use { db ->
@@ -234,7 +234,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
         }
     }
 
-    fun actualizarUsuario(usuario: EntidadUsuario): Boolean {
+    fun actualizarUsuario(usuario: UsuarioEntidad): Boolean {
 
         try {
             writableDatabase.use { db ->
