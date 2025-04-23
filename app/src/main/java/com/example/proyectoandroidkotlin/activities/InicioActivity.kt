@@ -1,9 +1,14 @@
 package com.example.proyectoandroidkotlin.activities
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.adaptadores.FragmentoListaUsuarioAdaptador
 import com.example.proyectoandroidkotlin.databinding.InicioLayoutBinding
@@ -11,13 +16,23 @@ import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.google.android.material.tabs.TabLayoutMediator
 
 class InicioActivity: AppCompatActivity() {
+
+    companion object {
+        private const val REQUEST_CODE_PERMISO_NOTIFICACION = 500
+    }
+
     private val binding by lazy { InicioLayoutBinding.inflate(layoutInflater) }
     private var usuario: UsuarioEntidad? = null
     private var bundleRecogida: Bundle? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pedirPermisoNotificacion()
+        }
 
         bundleRecogida = intent.extras
 
@@ -59,5 +74,26 @@ class InicioActivity: AppCompatActivity() {
     private fun setViewPagerAdapter(usuario: UsuarioEntidad) {
         binding.viewpager.adapter = FragmentoListaUsuarioAdaptador(this, usuario)
         binding.viewpager.offscreenPageLimit = 3
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun pedirPermisoNotificacion() {
+        if(!tienePermisoNotificacion()) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE_PERMISO_NOTIFICACION)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun tienePermisoNotificacion(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
+
+        if(requestCode == REQUEST_CODE_PERMISO_NOTIFICACION) {
+
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
     }
 }

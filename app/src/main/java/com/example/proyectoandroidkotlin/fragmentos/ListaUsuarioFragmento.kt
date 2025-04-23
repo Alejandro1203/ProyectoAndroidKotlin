@@ -1,7 +1,10 @@
 package com.example.proyectoandroidkotlin.fragmentos
 
-import android.app.Activity.RESULT_OK
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,13 +13,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.proyectoandroidkotlin.R
-import com.example.proyectoandroidkotlin.activities.InicioActivity
 import com.example.proyectoandroidkotlin.activities.RegistroActivity
-import com.example.proyectoandroidkotlin.adaptadores.FragmentoListaUsuarioAdaptador
 import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador.AdaptadorInterfaz
 import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador
 import com.example.proyectoandroidkotlin.databinding.RecyclerBinding
@@ -134,6 +136,7 @@ class ListaUsuarioFragmento: Fragment() {
                 usuario?.let {
                     if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
                         Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
+                        crearNotificacion(usuario.nombre)
                         usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
                     }
                 }
@@ -142,5 +145,28 @@ class ListaUsuarioFragmento: Fragment() {
                 launcherEditar.launch(intentEditar(usuario))
             }
             .show()
+    }
+
+    private fun crearNotificacion(nombreUsuario: String) {
+        val canalNombre = "CANAL_NOMBRE"
+        val descripcion = "Eliminado"
+        val importancia = NotificationManager.IMPORTANCE_DEFAULT
+        val canalId = "CANAL_ID"
+
+        val canal = NotificationChannel(canalId, canalNombre, importancia).apply {
+            description = descripcion
+        }
+
+        val notificationManager: NotificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(canal)
+
+        val builder = NotificationCompat.Builder(requireContext(), canalId)
+            .setSmallIcon(R.drawable.notificacion)
+            .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.spiderman))
+            .setContentTitle(context?.getString(R.string.usuario_eliminado))
+            .setContentText(context?.getString(R.string.usuario_eliminado) + nombreUsuario)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        notificationManager.notify(1, builder.build())
     }
 }
