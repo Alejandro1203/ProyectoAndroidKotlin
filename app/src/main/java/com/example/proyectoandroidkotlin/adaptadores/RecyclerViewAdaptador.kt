@@ -24,7 +24,7 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
         holder.bindUsuario(usuario, position)
 
         if(usuario.baja == 1) {
-            holder.binding.cardView.setBackgroundColor("#E15E5B".toColorInt())
+            holder.binding.cardView.setCardBackgroundColor("#E15E5B".toColorInt())
         } else if(usuario.rol == 1) {
             holder.binding.cardView.setCardBackgroundColor("#5B9EE1".toColorInt())
         } else {

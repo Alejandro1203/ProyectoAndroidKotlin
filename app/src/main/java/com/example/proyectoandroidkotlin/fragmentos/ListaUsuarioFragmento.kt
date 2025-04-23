@@ -28,6 +28,7 @@ class ListaUsuarioFragmento: Fragment() {
     private var usuario: UsuarioEntidad ?= null
     private var usuarioLogin: UsuarioEntidad ?= null
     private var bundleEnvio: Bundle = Bundle()
+    private final var MOD_USER = 1000
 
     fun newInstance(userType: String, usuario: UsuarioEntidad?): ListaUsuarioFragmento {
         var fragmento = ListaUsuarioFragmento()
@@ -110,7 +111,7 @@ class ListaUsuarioFragmento: Fragment() {
 
     private val launcherEditar: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
-            if(result.resultCode == RESULT_OK && result.data != null) {
+            if(result.resultCode == MOD_USER && result.data != null) {
                 updateRecyclerView()
             }
         }

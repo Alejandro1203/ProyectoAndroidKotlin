@@ -15,21 +15,22 @@ class InicioActivity: AppCompatActivity() {
     private var usuario: UsuarioEntidad? = null
     private var bundleRecogida: Bundle? = null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         bundleRecogida = intent.extras
 
-        usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", UsuarioEntidad::class.java)) {
-                Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as UsuarioEntidad) {
-                Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+        if(bundleRecogida != null) {
+            usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", UsuarioEntidad::class.java)) {
+                    Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as UsuarioEntidad) {
+                    Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+                }
             }
         }
 

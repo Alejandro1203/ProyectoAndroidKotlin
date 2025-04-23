@@ -61,6 +61,7 @@ import java.util.TimeZone
 class RegistroActivity: AppCompatActivity() {
 
     companion object {
+        private const val MOD_USER = 1000
         private const val REQUEST_CODE_DIALOG_CAMARA = 2000
         private const val REQUEST_CODE_DIALOG_GALERIA = 3000
         private const val REQUEST_CODE_PERMISO_LOCALIZACION = 100
@@ -75,6 +76,7 @@ class RegistroActivity: AppCompatActivity() {
     private val grupoUsuarioBBDD by lazy { GrupoUsuarioBBDD(this) }
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
     private var bundleRecogida: Bundle ?= null
+    private var bundleEnvio = Bundle()
     private var listaGrupoUsuario: List<GrupoUsuarioEntidad> = emptyList()
     private var fechaSeleccionada: Long = -1L
 //    lateinit var dialogCamara: MaterialAlertDialogBuilder
@@ -94,6 +96,7 @@ class RegistroActivity: AppCompatActivity() {
     private var longitud: String = "0.0"
     private var usuarioEditar: UsuarioEntidad ?= null
     private var usuarioEditor: UsuarioEntidad ?= null
+    private var estaModificando = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,53 +108,113 @@ class RegistroActivity: AppCompatActivity() {
         bundleRecogida = intent.extras
 
         if(bundleRecogida != null) {
-            usuarioEditor = bundleRecogida?.getSerializable("usuarioEditor") as UsuarioEntidad
-            usuarioEditar = bundleRecogida?.getSerializable("usuarioEditar") as UsuarioEntidad
-
+            usuarioEditor = obtenerUsuarioSerializable("usuarioEditor")
+            usuarioEditar = obtenerUsuarioSerializable("usuarioEditar")
             setVistaEdicion()
+            estaModificando = true
+        }
 
-            binding.iconoUsuario.setOnClickListener {  }
+        binding.iconoUsuario.setOnClickListener {
+            if (estaModificando) {
+                intent = Intent(this, GaleriaActivity::class.java)
+                bundleEnvio.putSerializable("usuarioEditar", usuarioEditar)
+                intent.putExtras(bundleEnvio)
+                startActivity(intent)
+            }
+        }
 
-            binding.btnMapa.setOnClickListener {
+        binding.btnMapa.setOnClickListener {
+            if (estaModificando) {
                 abrirMapa()
             }
+        }
 
-            binding.btnFoto.setOnClickListener {
+        binding.btnFoto.setOnClickListener {
+            if (estaModificando) {
                 crearDialogOpcionesImagenes()
+            } else {
+                crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA)
             }
+        }
 
-            binding.btnRegistrar.setOnClickListener {  }
+        binding.btnRegistrar.setOnClickListener {
+            if (camposRellenos()) {
+                nombre = binding.edtNombre.editText?.text.toString().trim()
+                correo = binding.edtCorreo.editText?.text.toString().trim()
+                fechaNacimiento = binding.datePicker.editText?.text.toString().trim()
 
-        } else {
-            binding.btnFoto.setOnClickListener { crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA) }
-
-            binding.btnRegistrar.setOnClickListener {
-                if(camposRellenos()) {
-                    nombre = binding.edtNombre.editText?.text.toString().trim()
-                    correo = binding.edtCorreo.editText?.text.toString().trim()
-                    fechaNacimiento = binding.datePicker.editText?.text.toString().trim()
-
-                    if(validarCampos(nombre, correo, fechaNacimiento)) {
-                        if(usuarioBBDD.correoExiste(correo)) {
-                            Snackbar.make(binding.snackbar, R.string.error_correo, Snackbar.LENGTH_SHORT).show()
+                if (validarCampos(nombre, correo, fechaNacimiento)) {
+                    if (!estaModificando) {
+                        if (usuarioBBDD.correoExiste(correo)) {
+                            Snackbar.make(
+                                binding.snackbar,
+                                R.string.error_correo,
+                                Snackbar.LENGTH_SHORT
+                            ).show()
                         } else {
                             contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
                             ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
+                            baja = 0
 
-                            if(getLocalizacion()) {
+                            if (getLocalizacion()) {
                                 localizacionConseguida()
                             }
                         }
+                    } else {
+                        contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
+                        ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
+                        baja = if (binding.switchBaja.isChecked) {
+                            1
+                        } else {
+                            0
+                        }
+
+                        idRol = if (idRol == -1) {
+                            usuarioEditar?.rol ?: 2
+                        } else {
+                            idRol
+                        }
+
+                        fotoRutaAvatar = if (fotoRutaAvatar == "") {
+                            usuarioEditar?.fotoPerfil ?: ""
+                        } else {
+                            fotoRutaAvatar
+                        }
+
+                        val usuario = usuarioEditar?.let {
+                            UsuarioEntidad(id = usuarioEditar?.id!!, nombre = nombre, correo = correo, contrasenya = contrasenya, fechaNacimiento = fechaNacimiento,
+                                           rol = idRol, fotoPerfil = fotoRutaAvatar, baja = baja, galeria = usuarioEditar?.galeria!!, ultimaModificacion = ultimaModificacion,
+                                           latitud = usuarioEditar?.latitud!!,
+                                           longitud = usuarioEditar?.longitud!!)
+                        }
+
+                        usuario?.let { it ->
+                            if (usuarioBBDD.actualizarUsuario(it)) {
+                                Toast.makeText(this, R.string.toast_modificado, Toast.LENGTH_SHORT)
+                                    .show()
+                                intent = Intent()
+                                bundleEnvio.putSerializable("usuarioLogin", usuarioEditor)
+                                intent.putExtras(bundleEnvio)
+                                setResult(MOD_USER, intent)
+                                finish()
+                            }
+                        }
                     }
-                } else {
-                    Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show()
                 }
+            } else {
+                Snackbar.make(
+                    binding.snackbar,
+                    R.string.error_campos_incompletos,
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         }
 
         binding.txtIniciado.setOnClickListener { v ->
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            if(!estaModificando) {
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+            }
         }
 
         binding.datePicker.setEndIconOnClickListener { v ->
@@ -192,8 +255,7 @@ class RegistroActivity: AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
     }
 
-    private val launcherAvatarCamara: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result ->
+    private val launcherAvatarCamara: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
         if(result.resultCode == RESULT_OK && result.data != null) {
             foto = result.data?.extras?.get("data") as? Bitmap
@@ -206,8 +268,7 @@ class RegistroActivity: AppCompatActivity() {
         }
     }
 
-    private val launcherAvatarGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result ->
+    private val launcherAvatarGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
         if(result.resultCode == RESULT_OK && result.data != null && result.data!!.data != null ) {
             uriFoto = result.data!!.data
@@ -227,13 +288,11 @@ class RegistroActivity: AppCompatActivity() {
         }
     }
 
-    private val launcherGaleriaCamara: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result ->
+    private val launcherGaleriaCamara: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
     }
 
-    private val launcherGaleriaGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()) { result ->
+    private val launcherGaleriaGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
     }
 
@@ -385,6 +444,7 @@ class RegistroActivity: AppCompatActivity() {
         }
 
         binding.iconoUsuario.setImageURI(usuarioEditar?.fotoPerfil?.toUri())
+        binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
         binding.txtUltimaModificacion.text = usuarioEditar?.ultimaModificacion
         binding.edtNombre.editText?.setText(usuarioEditar?.nombre)
         binding.edtCorreo.editText?.setText(usuarioEditar?.correo)
@@ -392,6 +452,19 @@ class RegistroActivity: AppCompatActivity() {
         binding.datePicker.editText?.setText(usuarioEditar?.fechaNacimiento)
         usuarioEditar?.rol?.let { binding.spinner.setSelection(it - 1) }
         binding.btnRegistrar.text = getString(R.string.btn_actualizar)
+    }
+
+    private fun obtenerUsuarioSerializable(key: String): UsuarioEntidad? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireNotNull(bundleRecogida?.getSerializable(key, UsuarioEntidad::class.java)) {
+                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            requireNotNull(bundleRecogida?.getSerializable(key) as UsuarioEntidad) {
+                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+            }
+        }
     }
 
     private fun crearDialogCamara(requestCode: Int) {

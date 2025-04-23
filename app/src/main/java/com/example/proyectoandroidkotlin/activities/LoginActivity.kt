@@ -49,6 +49,7 @@ class LoginActivity: AppCompatActivity() {
 
         binding.txtRegistrar.setOnClickListener { v ->
             startActivity(Intent(this, RegistroActivity::class.java))
+            finish()
         }
     }
 
