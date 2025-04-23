@@ -34,8 +34,7 @@ class InicioActivity: AppCompatActivity() {
             }
         }
 
-        binding.viewpager.adapter = FragmentoListaUsuarioAdaptador(this, usuario)
-        binding.viewpager.offscreenPageLimit = 3
+        usuario?.let { setViewPagerAdapter(it) }
 
         TabLayoutMediator(binding.tabLayout, binding.viewpager) { tab, position ->
 
@@ -50,5 +49,15 @@ class InicioActivity: AppCompatActivity() {
                 tab.text = getString(R.string.usuarios_normales)
             }
         }.attach()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        usuario?.let { setViewPagerAdapter(it) }
+    }
+
+    private fun setViewPagerAdapter(usuario: UsuarioEntidad) {
+        binding.viewpager.adapter = FragmentoListaUsuarioAdaptador(this, usuario)
+        binding.viewpager.offscreenPageLimit = 3
     }
 }

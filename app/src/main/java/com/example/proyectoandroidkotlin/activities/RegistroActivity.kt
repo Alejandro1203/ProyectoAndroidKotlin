@@ -104,7 +104,6 @@ class RegistroActivity: AppCompatActivity() {
         setContentView(binding.root)
 
         rellenarSpinnerRoles()
-
         bundleRecogida = intent.extras
 
         if(bundleRecogida != null) {
@@ -190,8 +189,7 @@ class RegistroActivity: AppCompatActivity() {
 
                         usuario?.let { it ->
                             if (usuarioBBDD.actualizarUsuario(it)) {
-                                Toast.makeText(this, R.string.toast_modificado, Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(this, R.string.toast_modificado, Toast.LENGTH_SHORT).show()
                                 intent = Intent()
                                 bundleEnvio.putSerializable("usuarioLogin", usuarioEditor)
                                 intent.putExtras(bundleEnvio)
@@ -202,11 +200,7 @@ class RegistroActivity: AppCompatActivity() {
                     }
                 }
             } else {
-                Snackbar.make(
-                    binding.snackbar,
-                    R.string.error_campos_incompletos,
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                Snackbar.make(binding.snackbar, R.string.error_campos_incompletos, Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -295,7 +289,6 @@ class RegistroActivity: AppCompatActivity() {
     private val launcherGaleriaGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
     }
-
 
     private fun camposRellenos(): Boolean {
         return binding.edtNombre.editText?.text.toString().trim().isNotEmpty() &&
