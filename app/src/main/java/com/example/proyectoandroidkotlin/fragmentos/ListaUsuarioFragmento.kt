@@ -2,6 +2,7 @@ package com.example.proyectoandroidkotlin.fragmentos
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -18,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.proyectoandroidkotlin.R
+import com.example.proyectoandroidkotlin.activities.LoginActivity
 import com.example.proyectoandroidkotlin.activities.RegistroActivity
 import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador.AdaptadorInterfaz
 import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador
@@ -136,7 +138,7 @@ class ListaUsuarioFragmento: Fragment() {
                 usuario?.let {
                     if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
                         Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
-                        crearNotificacion(usuario.nombre)
+                        crearNotificacion(usuario)
                         usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
                     }
                 }
@@ -147,7 +149,7 @@ class ListaUsuarioFragmento: Fragment() {
             .show()
     }
 
-    private fun crearNotificacion(nombreUsuario: String) {
+    private fun crearNotificacion(usuario: UsuarioEntidad) {
         val canalNombre = "CANAL_NOMBRE"
         val descripcion = "Eliminado"
         val importancia = NotificationManager.IMPORTANCE_DEFAULT
@@ -157,6 +159,11 @@ class ListaUsuarioFragmento: Fragment() {
             description = descripcion
         }
 
+        val contentIntent = Intent(context, LoginActivity::class.java)
+        bundleEnvio.putSerializable("usuarioLogin", usuarioLogin)
+        contentIntent.putExtras(bundleEnvio)
+        val contentPendingIntent = PendingIntent.getActivity(context, 1, contentIntent, PendingIntent.FLAG_IMMUTABLE)
+
         val notificationManager: NotificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(canal)
 
@@ -164,8 +171,10 @@ class ListaUsuarioFragmento: Fragment() {
             .setSmallIcon(R.drawable.notificacion)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.spiderman))
             .setContentTitle(context?.getString(R.string.usuario_eliminado))
-            .setContentText(context?.getString(R.string.usuario_eliminado) + nombreUsuario)
+            .setContentText(context?.getString(R.string.usuario_eliminado) + " " + usuario.nombre)
+            .setContentIntent(contentPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
 
         notificationManager.notify(1, builder.build())
     }

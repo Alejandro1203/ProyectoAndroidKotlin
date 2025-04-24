@@ -109,8 +109,14 @@ class RegistroActivity: AppCompatActivity() {
         if(bundleRecogida != null) {
             usuarioEditor = obtenerUsuarioSerializable("usuarioEditor")
             usuarioEditar = obtenerUsuarioSerializable("usuarioEditar")
-            setVistaEdicion()
-            estaModificando = true
+
+            if(usuarioEditor != null && usuarioEditar != null) {
+                setVistaEdicion()
+                estaModificando = true
+            } else {
+                Toast.makeText(this, getString(R.string.error_usuario_no_encontrado), Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
 
         binding.iconoUsuario.setOnClickListener {
@@ -448,16 +454,32 @@ class RegistroActivity: AppCompatActivity() {
     }
 
     private fun obtenerUsuarioSerializable(key: String): UsuarioEntidad? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireNotNull(bundleRecogida?.getSerializable(key, UsuarioEntidad::class.java)) {
-                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requireNotNull(bundleRecogida?.getSerializable(key, UsuarioEntidad::class.java)) {
+                    Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                requireNotNull(bundleRecogida?.getSerializable(key) as UsuarioEntidad) {
+                    Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+                }
             }
-        } else {
-            @Suppress("DEPRECATION")
-            requireNotNull(bundleRecogida?.getSerializable(key) as UsuarioEntidad) {
-                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
-            }
+        } catch (e: Exception) {
+            Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle) + e)
+            null
         }
+
+//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            requireNotNull(bundleRecogida?.getSerializable(key, UsuarioEntidad::class.java)) {
+//                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+//            }
+//        } else {
+//            @Suppress("DEPRECATION")
+//            requireNotNull(bundleRecogida?.getSerializable(key) as UsuarioEntidad) {
+//                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
+//            }
+//        }
     }
 
     private fun crearDialogCamara(requestCode: Int) {

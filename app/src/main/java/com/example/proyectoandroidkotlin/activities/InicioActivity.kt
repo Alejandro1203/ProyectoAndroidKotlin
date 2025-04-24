@@ -1,6 +1,11 @@
 package com.example.proyectoandroidkotlin.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -37,19 +42,24 @@ class InicioActivity: AppCompatActivity() {
         bundleRecogida = intent.extras
 
         if(bundleRecogida != null) {
-            usuario = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", UsuarioEntidad::class.java)) {
-                    Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+            usuario = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", UsuarioEntidad::class.java)) {
+                        Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as UsuarioEntidad) {
+                        Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
+                    }
                 }
-            } else {
-                @Suppress("DEPRECATION")
-                requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as UsuarioEntidad) {
-                    Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle))
-                }
+            } catch (e: Exception) {
+                Log.e(getString(R.string.error_clase_InicioActivity), getString(R.string.no_usuario_bundle) + e)
+                null
             }
-        }
 
-        usuario?.let { setViewPagerAdapter(it) }
+            usuario?.let { setViewPagerAdapter(it) }
+        }
 
         TabLayoutMediator(binding.tabLayout, binding.viewpager) { tab, position ->
 
@@ -66,6 +76,7 @@ class InicioActivity: AppCompatActivity() {
         }.attach()
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onResume() {
         super.onResume()
         usuario?.let { setViewPagerAdapter(it) }

@@ -1,10 +1,13 @@
 package com.example.proyectoandroidkotlin.activities
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.databinding.LoginLayoutBinding
+import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.google.android.material.snackbar.Snackbar
 import kotlin.properties.Delegates
@@ -15,13 +18,37 @@ class LoginActivity: AppCompatActivity() {
     private var nombre: String = ""
     private var contrasenya: String = ""
     private var id by Delegates.notNull<Int>()
+    private var usuario: UsuarioEntidad? = null
     private var bundleEnvio = Bundle()
+    private var bundleRecogida: Bundle? = null
     private var usuarioBBDD = UsuarioBBDD(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = LoginLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        bundleRecogida = intent.extras
+
+        if(bundleRecogida != null) {
+            usuario = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requireNotNull(bundleRecogida?.getSerializable("usuarioLogin", UsuarioEntidad::class.java)) {
+                        Log.e(getString(R.string.error_clase_LoginActivity), getString(R.string.no_usuario_bundle))
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    requireNotNull(bundleRecogida?.getSerializable("usuarioLogin") as UsuarioEntidad) {
+                        Log.e(getString(R.string.error_clase_LoginActivity), getString(R.string.no_usuario_bundle))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(getString(R.string.error_clase_LoginActivity), getString(R.string.no_usuario_bundle) + e)
+                null
+            }
+
+            usuario?.id?.let { inicioSesion(it) }
+        }
 
         binding.btnInicioSesion.setOnClickListener { v ->
             if(camposRellenos()) {

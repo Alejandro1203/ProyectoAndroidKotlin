@@ -75,9 +75,11 @@
     <string name="error_cargando_imagen">No se pudo cargar la imagen</string>
     <string name="error_clase_InicioActivity">Error clase InicioActivity.kt</string>
     <string name="error_clase_RegistroActivity">Error clase RegistroActivity.kt</string>
+    <string name="error_clase_LoginActivity">Error clase LoginActivity.kt</string>
     <string name="error_decodificar_imagen">Error al decodificar imagen</string>
     <string name="error_uri">Error en la uri</string>
     <string name="error_ruta_imagen">Error en la ruta imagen</string>
+    <string name="error_usuario_no_encontrado">Error usuario no encontrado</string>
 
     <string name="ya_tengo_cuenta"><u>Ya tengo cuenta. Iniciar sesión.</u></string>
     <string name="no_tengo_cuenta_registrarme"><u>No tengo cuenta. Registrarme.</u></string>
