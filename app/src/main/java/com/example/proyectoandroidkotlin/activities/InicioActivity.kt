@@ -2,14 +2,12 @@ package com.example.proyectoandroidkotlin.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,12 +16,14 @@ import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.adaptadores.FragmentoListaUsuarioAdaptador
 import com.example.proyectoandroidkotlin.databinding.InicioLayoutBinding
 import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
+import com.example.proyectoandroidkotlin.servicios.UbicacionSegundoPlanoServicio
 import com.google.android.material.tabs.TabLayoutMediator
 
 class InicioActivity: AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE_PERMISO_NOTIFICACION = 500
+        private const val REQUEST_CODE_BACKGROUND_LOCATION = 7000;
     }
 
     private val binding by lazy { InicioLayoutBinding.inflate(layoutInflater) }
@@ -34,6 +34,12 @@ class InicioActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        if(tienePermisoBackGround()) {
+            startForegroundService(Intent(this, UbicacionSegundoPlanoServicio::class.java))
+        } else {
+            pedirPermisoBackGround()
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pedirPermisoNotificacion()
@@ -82,6 +88,11 @@ class InicioActivity: AppCompatActivity() {
         usuario?.let { setViewPagerAdapter(it) }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService(Intent(this, UbicacionSegundoPlanoServicio::class.java))
+    }
+
     private fun setViewPagerAdapter(usuario: UsuarioEntidad) {
         binding.viewpager.adapter = FragmentoListaUsuarioAdaptador(this, usuario)
         binding.viewpager.offscreenPageLimit = 3
@@ -99,12 +110,25 @@ class InicioActivity: AppCompatActivity() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
+    private fun pedirPermisoBackGround() {
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), REQUEST_CODE_BACKGROUND_LOCATION);
+    }
 
-        if(requestCode == REQUEST_CODE_PERMISO_NOTIFICACION) {
-
+    private fun tienePermisoBackGround(): Boolean {
+        return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED
+        } else {
+            true
         }
+    }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String?>, grantResults: IntArray, deviceId: Int) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+
+        if (requestCode == REQUEST_CODE_BACKGROUND_LOCATION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startForegroundService(Intent(this, UbicacionSegundoPlanoServicio::class.java))
+        } else {
+            pedirPermisoBackGround();
+        }
     }
 }

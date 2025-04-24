@@ -152,7 +152,7 @@ class ListaUsuarioFragmento: Fragment() {
     private fun crearNotificacion(usuario: UsuarioEntidad) {
         val canalNombre = "CANAL_NOMBRE"
         val descripcion = "Eliminado"
-        val importancia = NotificationManager.IMPORTANCE_DEFAULT
+        val importancia = NotificationManager.IMPORTANCE_HIGH
         val canalId = "CANAL_ID"
 
         val canal = NotificationChannel(canalId, canalNombre, importancia).apply {

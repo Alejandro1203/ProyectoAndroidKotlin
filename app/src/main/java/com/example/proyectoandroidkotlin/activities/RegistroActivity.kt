@@ -469,17 +469,6 @@ class RegistroActivity: AppCompatActivity() {
             Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle) + e)
             null
         }
-
-//        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//            requireNotNull(bundleRecogida?.getSerializable(key, UsuarioEntidad::class.java)) {
-//                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
-//            }
-//        } else {
-//            @Suppress("DEPRECATION")
-//            requireNotNull(bundleRecogida?.getSerializable(key) as UsuarioEntidad) {
-//                Log.e(getString(R.string.error_clase_RegistroActivity), getString(R.string.no_usuario_bundle))
-//            }
-//        }
     }
 
     private fun crearDialogCamara(requestCode: Int) {
