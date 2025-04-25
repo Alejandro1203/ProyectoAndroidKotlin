@@ -79,7 +79,6 @@ class RegistroActivity: AppCompatActivity() {
     private var bundleEnvio = Bundle()
     private var listaGrupoUsuario: List<GrupoUsuarioEntidad> = emptyList()
     private var fechaSeleccionada: Long = -1L
-//    lateinit var dialogCamara: MaterialAlertDialogBuilder
     private var foto: Bitmap ?= null
     private var uriFoto: Uri ?= null
     private var fotoRutaAvatar: String = ""

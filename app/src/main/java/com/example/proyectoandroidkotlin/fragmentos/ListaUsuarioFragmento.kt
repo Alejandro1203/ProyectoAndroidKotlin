@@ -8,6 +8,8 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +30,7 @@ import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.example.proyectoandroidkotlin.viewmodel.UsuarioViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 
 class ListaUsuarioFragmento: Fragment() {
 
@@ -87,6 +90,25 @@ class ListaUsuarioFragmento: Fragment() {
         }
 
         usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        requireActivity().findViewById<TextInputLayout>(R.id.buscador).editText?.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                recyclerViewAdaptador?.filter?.filter(s)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
     }
 
     private fun updateRecyclerView() {

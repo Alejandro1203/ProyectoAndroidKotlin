@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyectoandroidkotlin.adaptadores.RecyclerViewAdaptador.ViewHolderUsuario
@@ -12,7 +14,8 @@ import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.GrupoUsuarioBBDD
 import androidx.core.net.toUri
 
-class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<UsuarioEntidad>, val esAdministrador: Boolean, val adaptadorInterfaz: AdaptadorInterfaz): RecyclerView.Adapter<ViewHolderUsuario>() {
+class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<UsuarioEntidad>, val esAdministrador: Boolean, val adaptadorInterfaz: AdaptadorInterfaz): RecyclerView.Adapter<ViewHolderUsuario>(), Filterable {
+    private var listaFiltrada: ArrayList<UsuarioEntidad> = listaUsuarios
 
     override fun onCreateViewHolder(parent: ViewGroup,viewType: Int): ViewHolderUsuario {
         val binding = UsuarioBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -20,7 +23,7 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
     }
 
     override fun onBindViewHolder(holder: ViewHolderUsuario, position: Int) {
-        val usuario = listaUsuarios[position]
+        val usuario = listaFiltrada[position]
         holder.bindUsuario(usuario, position)
 
         if(usuario.baja == 1) {
@@ -39,7 +42,42 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
     }
 
     override fun getItemCount(): Int {
-        return listaUsuarios.size
+        return listaFiltrada.size
+    }
+
+    override fun getFilter(): Filter {
+        return object: Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults? {
+                var filtro = constraint.toString().lowercase().trim()
+
+                filtro.let {
+                    if(it.isNotEmpty()) {
+                        var nuevaListaFiltrada: ArrayList<UsuarioEntidad> = arrayListOf()
+
+                        for(usuario in listaUsuarios) {
+                            if(usuario.nombre.lowercase().contains(filtro) || usuario.correo.lowercase().contains(filtro) ||
+                               usuario.fechaNacimiento.contains(filtro)) {
+                                nuevaListaFiltrada.add(usuario)
+                            }
+                        }
+
+                        listaFiltrada = nuevaListaFiltrada
+                    }
+                }
+
+                var resultadosFiltrados = FilterResults()
+                resultadosFiltrados.values = listaFiltrada
+
+                return resultadosFiltrados
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+                listaFiltrada = results.values as ArrayList<UsuarioEntidad>
+                notifyDataSetChanged()
+            }
+
+        }
+
     }
 
     inner class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {
