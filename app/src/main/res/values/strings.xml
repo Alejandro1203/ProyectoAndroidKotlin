@@ -37,6 +37,7 @@
     <string name="se_elimino_a">Se eliminó a </string>
     <string name="titulo_ubicacion">Servicio de ubicación</string>
     <string name="ubicacion_segundo_plano">Obteniendo ubicación en segundo plano</string>
+    <string name="ubicacion_segundo_plano_con_datos">Ubicación en segundo plano\nLatitud: %1$s\nLongitud: %2$s</string>
 
     <string name="error_Usuario">Error Tabla Usuario</string>
     <string name="metodo_getAllUsuarios">getAllUsuarios</string>

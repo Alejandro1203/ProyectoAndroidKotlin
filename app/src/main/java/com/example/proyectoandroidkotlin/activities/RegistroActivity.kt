@@ -192,11 +192,12 @@ class RegistroActivity: AppCompatActivity() {
                             fotoRutaAvatar
                         }
 
+                        val galeria = usuarioEditar?.id?.let { id -> usuarioBBDD.getGaleriaById(id) }
+
                         val usuario = usuarioEditar?.let {
                             UsuarioEntidad(id = usuarioEditar?.id!!, nombre = nombre, correo = correo, contrasenya = contrasenya, fechaNacimiento = fechaNacimiento,
-                                           rol = idRol, fotoPerfil = fotoRutaAvatar, baja = baja, galeria = usuarioEditar?.galeria!!, ultimaModificacion = ultimaModificacion,
-                                           latitud = usuarioEditar?.latitud!!,
-                                           longitud = usuarioEditar?.longitud!!)
+                                           rol = idRol, fotoPerfil = fotoRutaAvatar, baja = baja, galeria = galeria ?: "", ultimaModificacion = ultimaModificacion,
+                                           latitud = usuarioEditar?.latitud!!, longitud = usuarioEditar?.longitud!!)
                         }
 
                         usuario?.let { it ->
@@ -281,13 +282,10 @@ class RegistroActivity: AppCompatActivity() {
 
             uriFoto?.let { imageDecoder(it) }
 
-            if(foto != null) {
-                if (getRutaFromUri(uriFoto) != null) {
-                    fotoRutaAvatar = getRutaFromUri(uriFoto)!!
-                    binding.iconoUsuario.setImageBitmap(BitmapFactory.decodeFile(fotoRutaAvatar))
-                    binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
-                }
-
+            if (getRutaFromUri(uriFoto) != null) {
+                fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+                binding.iconoUsuario.setImageBitmap(BitmapFactory.decodeFile(fotoRutaAvatar))
+                binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
             } else {
                 Toast.makeText(this, R.string.error_cargando_imagen, Toast.LENGTH_SHORT).show()
             }
@@ -615,7 +613,6 @@ class RegistroActivity: AppCompatActivity() {
         if(requestCode == REQUEST_CODE_DIALOG_GALERIA) {
             launcherGaleriaGaleria.launch(intent)
         }
-
     }
 
     private fun pedirPermisoLocalizacion() {

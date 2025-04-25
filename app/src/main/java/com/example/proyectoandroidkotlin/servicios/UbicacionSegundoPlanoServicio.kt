@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.example.proyectoandroidkotlin.R
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
@@ -26,23 +27,23 @@ class UbicacionSegundoPlanoServicio: Service() {
         private const val DESCRIPCION_NOTIFICACION = "Ubicacion en segundo plano"
         private const val IMPORTANCIA_NOTIFICACION = NotificationManager.IMPORTANCE_HIGH
         private const val ID_CANAL = "ID_UBI"
+        private const val ID_NOTIFICACION = 2
     }
 
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
     private var locationCallback: LocationCallback ?= null
-    private var latitud: String = ""
-    private var longitud: String = ""
 
 
     override fun onCreate() {
         super.onCreate()
+        crearCanalNotificacion()
 
-        locationCallback = object:  LocationCallback() {
+        locationCallback = object: LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
 
                 locationResult.lastLocation?.let {
-                    latitud = it.latitude.toString()
-                    longitud = it.longitude.toString()
+                    val latitud = it.latitude.toString()
+                    val longitud = it.longitude.toString()
 
                     crearNotificacion(latitud, longitud)
                 }
@@ -66,25 +67,27 @@ class UbicacionSegundoPlanoServicio: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback!!)
+        locationCallback?.let { fusedLocationProviderClient.removeLocationUpdates(it) }
     }
 
-    private fun crearNotificacion(latitud: String, longitud: String) {
+    private fun crearCanalNotificacion() {
         val canal = NotificationChannel(ID_CANAL, NOMBRE_CANAL, IMPORTANCIA_NOTIFICACION).apply {
             description = DESCRIPCION_NOTIFICACION
         }
 
-        val notificationManager: NotificationManager = this.getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(canal)
+        val notificationManager = ContextCompat.getSystemService(this, NotificationManager::class.java)
+        notificationManager?.createNotificationChannel(canal)
+    }
 
+    private fun crearNotificacion(latitud: String, longitud: String) {
         val builder = NotificationCompat.Builder(this, ID_CANAL)
             .setSmallIcon(R.drawable.notificacion)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.spiderman))
             .setContentTitle(getString(R.string.titulo_ubicacion))
-            .setContentText(getString(R.string.ubicacion_segundo_plano) + " Latitud:" + latitud + "\nLongitud: " + longitud)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentText(getString(R.string.ubicacion_segundo_plano_con_datos, latitud , longitud))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(true)
 
-        startForeground(2, builder.build())
+        startForeground(ID_NOTIFICACION, builder.build())
     }
 }

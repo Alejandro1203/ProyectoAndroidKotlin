@@ -27,8 +27,9 @@ class GaleriaActivity: AppCompatActivity(){
             usuario = obtenerUsuarioSerializable("usuarioEditar")
 
             val galeriaUsuario = usuario?.let { obtenerGaleriaUsuario(it) }
-            binding.galeria.adapter =
-                usuario?.nombre?.let { galeriaUsuario?.let { listaImagenes -> GaleriaAdaptador(this, it, listaImagenes) } }
+            binding.galeria.adapter = usuario?.nombre?.let { galeriaUsuario?.let { listaImagenes -> GaleriaAdaptador(it, listaImagenes) } }
+
+            binding.dots.setViewPager(binding.galeria)
         }
     }
 

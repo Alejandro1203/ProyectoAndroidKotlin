@@ -272,8 +272,6 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
             getGaleriaById(id) + ";" + imagen
         }
 
-//        var galeria = getGaleriaById(id) + ";" + imagen
-
         try {
             writableDatabase.use { db ->
                 val valores = ContentValues().apply {

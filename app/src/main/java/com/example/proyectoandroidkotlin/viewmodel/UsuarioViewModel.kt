@@ -16,14 +16,14 @@ class UsuarioViewModel: ViewModel() {
 
     fun cargarListaUsuarios(userType: String, context: Context) {
         val usuarioBBDD = UsuarioBBDD(context)
-        var usuario: List<UsuarioEntidad> = emptyList()
 
-        when(userType) {
-            "ADMIN" -> usuario = usuarioBBDD.getAllUsuariosByRol(1)
-            "NORMAL" -> usuario = usuarioBBDD.getAllUsuariosByRol(2)
-            "BAJA" -> usuario = usuarioBBDD.getAllUsuariosBaja()
+        val usuarios = when(userType) {
+            "ADMIN" -> usuarioBBDD.getAllUsuariosByRol(1)
+            "NORMAL" -> usuarioBBDD.getAllUsuariosByRol(2)
+            "BAJA" -> usuarioBBDD.getAllUsuariosBaja()
+            else -> emptyList()
         }
 
-        listaUsuarios.value = usuario
+        listaUsuarios.value = usuarios
     }
 }
