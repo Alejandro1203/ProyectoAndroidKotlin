@@ -181,22 +181,22 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
     }
 
     fun getGaleriaById(id: Int): String {
+        var galeria = ""
         val query = "SELECT $COLUMNA_GALERIA FROM $TABLA_NOMBRE WHERE $COLUMNA_ID=?"
 
         try {
             readableDatabase.use { db ->
                 db.rawQuery(query, arrayOf(id.toString())).use { cursor ->
-                    return if(cursor.moveToNext()) {
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_GALERIA))
-                    } else {
-                        ""
+                    if(cursor.moveToNext()) {
+                        galeria = cursor.getString(cursor.getColumnIndexOrThrow(COLUMNA_GALERIA))
                     }
                 }
             }
         } catch (e: Exception) {
             Log.e(context.getString(R.string.error_Usuario), context.getString(R.string.metodo_getGaleriaById) + ": ", e)
-            return ""
         }
+
+        return galeria
     }
 
     fun getRolById(id: Int): Int = getUsuarioById(id)?.rol ?: -1
@@ -266,7 +266,13 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
     }
 
     fun insertarImagenesGaleria(id: Int, imagen: String): Boolean {
-        var galeria = getGaleriaById(id) + imagen + ";"
+        var galeria = if(getGaleriaById(id) == "") {
+            imagen
+        } else {
+            getGaleriaById(id) + ";" + imagen
+        }
+
+//        var galeria = getGaleriaById(id) + ";" + imagen
 
         try {
             writableDatabase.use { db ->

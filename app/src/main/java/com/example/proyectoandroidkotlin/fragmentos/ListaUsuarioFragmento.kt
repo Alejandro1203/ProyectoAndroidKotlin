@@ -134,17 +134,27 @@ class ListaUsuarioFragmento: Fragment() {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(context?.getString(R.string.messageDialogUsuario))
             .setNeutralButton(context?.getString(R.string.dialog_cancelar), null)
-            .setNegativeButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
+            .setPositiveButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
                 usuario?.let {
-                    if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
-                        Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
-                        crearNotificacion(usuario)
-                        usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
-                    }
+                    crearDialogConfirmacion(usuario)
                 }
             }
-            .setPositiveButton(context?.getString(R.string.dialog_editar)) { dialog, which ->
+            .setNegativeButton(context?.getString(R.string.dialog_editar)) { dialog, which ->
                 launcherEditar.launch(intentEditar(usuario))
+            }
+            .show()
+    }
+
+    private fun crearDialogConfirmacion(usuario: UsuarioEntidad) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(context?.getString(R.string.dialog_confirmacion))
+            .setNeutralButton(context?.getString(R.string.dialog_cancelar), null)
+            .setNegativeButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
+                if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
+                    Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
+                    crearNotificacion(usuario)
+                    usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
+                }
             }
             .show()
     }

@@ -83,7 +83,7 @@ class RegistroActivity: AppCompatActivity() {
     private var foto: Bitmap ?= null
     private var uriFoto: Uri ?= null
     private var fotoRutaAvatar: String = ""
-//    private var fotoRutaGaleria: String = ""
+    private var fotoRutaGaleria: String = ""
     private var nombre: String = ""
     private var correo: String = ""
     private var fechaNacimiento: String = ""
@@ -121,10 +121,17 @@ class RegistroActivity: AppCompatActivity() {
 
         binding.iconoUsuario.setOnClickListener {
             if (estaModificando) {
-                intent = Intent(this, GaleriaActivity::class.java)
-                bundleEnvio.putSerializable("usuarioEditar", usuarioEditar)
-                intent.putExtras(bundleEnvio)
-                startActivity(intent)
+                usuarioEditar?.let { it ->
+                    if(usuarioBBDD.getGaleriaById(it.id) != "") {
+                        intent = Intent(this, GaleriaActivity::class.java)
+                        bundleEnvio.putSerializable("usuarioEditar", usuarioEditar)
+                        intent.putExtras(bundleEnvio)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this, getString(R.string.no_existe_galeria), Toast.LENGTH_SHORT).show()
+                    }
+                }
+
             }
         }
 
@@ -289,11 +296,40 @@ class RegistroActivity: AppCompatActivity() {
     }
 
     private val launcherGaleriaCamara: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == RESULT_OK && result.data != null) {
+            foto = result.data?.extras?.get("data") as? Bitmap
+            uriFoto = getUriFoto(applicationContext, foto)
 
+            if(getRutaFromUri(uriFoto) != null) {
+                fotoRutaGaleria = getRutaFromUri(uriFoto)!!
+                usuarioEditar?.id?.let {
+                    if(usuarioBBDD.insertarImagenesGaleria(it, fotoRutaGaleria)) {
+                        Toast.makeText(this, getString(R.string.imagen_insertada), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Snackbar.make(binding.snackbar, R.string.imagen_no_insertada, Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private val launcherGaleriaGaleria: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 
+        if(result.resultCode == RESULT_OK && result.data != null && result.data!!.data != null )  {
+            uriFoto = result.data!!.data
+
+            uriFoto?.let { imageDecoder(it) }
+            if(getRutaFromUri(uriFoto) != null) {
+                fotoRutaGaleria = getRutaFromUri(uriFoto)!!
+                usuarioEditar?.id?.let {
+                    if(usuarioBBDD.insertarImagenesGaleria(it, fotoRutaGaleria)) {
+                        Toast.makeText(this, getString(R.string.imagen_insertada), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Snackbar.make(binding.snackbar, R.string.imagen_no_insertada, Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun camposRellenos(): Boolean {
@@ -561,7 +597,8 @@ class RegistroActivity: AppCompatActivity() {
 
         if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
             launcherAvatarCamara.launch(intent)
-        } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA){
+        }
+        if(requestCode == REQUEST_CODE_DIALOG_GALERIA){
             launcherGaleriaCamara.launch(intent)
         }
 
@@ -575,7 +612,8 @@ class RegistroActivity: AppCompatActivity() {
 
         if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
             launcherAvatarGaleria.launch(intent)
-        } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA) {
+        }
+        if(requestCode == REQUEST_CODE_DIALOG_GALERIA) {
             launcherGaleriaGaleria.launch(intent)
         }
 
