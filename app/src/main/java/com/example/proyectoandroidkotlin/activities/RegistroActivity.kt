@@ -62,8 +62,12 @@ class RegistroActivity: AppCompatActivity() {
 
     companion object {
         private const val MOD_USER = 1000
-        private const val REQUEST_CODE_DIALOG_CAMARA = 2000
-        private const val REQUEST_CODE_DIALOG_GALERIA = 3000
+        private const val REQUEST_CODE_CAMBIAR_AVATAR = 2000
+        private const val REQUEST_CODE_INSERTAR_GALERIA = 3000
+        private const val REQUEST_CODE_CAMARA_AVATAR = 4000
+        private const val REQUEST_CODE_GALERIA_AVATAR = 4001
+        private const val REQUEST_CODE_CAMARA_GALERIA = 4002
+        private const val REQUEST_CODE_GALERIA_GALERIA = 4003
         private const val REQUEST_CODE_PERMISO_LOCALIZACION = 100
         private const val REQUEST_CODE_PERMISO_CAMARA = 200
         private const val REQUEST_CODE_PERMISO_GALERIA = 300
@@ -144,7 +148,7 @@ class RegistroActivity: AppCompatActivity() {
             if (estaModificando) {
                 crearDialogOpcionesImagenes()
             } else {
-                crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA)
+                crearDialogCamara(REQUEST_CODE_CAMBIAR_AVATAR)
             }
         }
 
@@ -510,16 +514,32 @@ class RegistroActivity: AppCompatActivity() {
             .setNeutralButton(R.string.dialog_cancelar, null)
             .setPositiveButton("") { dialog, which ->
                 if(tienePermisoCamara()) {
-                    abrirCamara(requestCode)
+                    if(requestCode == REQUEST_CODE_INSERTAR_GALERIA) {
+                        abrirCamara(REQUEST_CODE_CAMARA_GALERIA)
+                    } else if(requestCode == REQUEST_CODE_CAMBIAR_AVATAR) {
+                        abrirCamara(REQUEST_CODE_CAMARA_AVATAR)
+                    }
                 } else {
-                    pedirPermisoCamara()
+                    if(requestCode == REQUEST_CODE_INSERTAR_GALERIA) {
+                        pedirPermisoCamara(REQUEST_CODE_CAMARA_GALERIA)
+                    } else if(requestCode == REQUEST_CODE_CAMBIAR_AVATAR) {
+                        pedirPermisoCamara(REQUEST_CODE_CAMARA_AVATAR)
+                    }
                 }
             }
             .setNegativeButton("") { dialog, which ->
                 if(tienePermidoGaleria()) {
-                    abrirGaleria(requestCode)
+                    if(requestCode == REQUEST_CODE_INSERTAR_GALERIA) {
+                        abrirGaleria(REQUEST_CODE_GALERIA_GALERIA)
+                    } else if(requestCode == REQUEST_CODE_CAMBIAR_AVATAR) {
+                        abrirGaleria(REQUEST_CODE_GALERIA_AVATAR)
+                    }
                 } else {
-                    pedirPermisoGaleria()
+                    if(requestCode == REQUEST_CODE_INSERTAR_GALERIA) {
+                        pedirPermisoGaleria(REQUEST_CODE_GALERIA_GALERIA)
+                    } else if(requestCode == REQUEST_CODE_CAMBIAR_AVATAR) {
+                        pedirPermisoGaleria(REQUEST_CODE_GALERIA_AVATAR)
+                    }
                 }
             }
             .setNegativeButtonIcon(ContextCompat.getDrawable(this, R.drawable.galeria))
@@ -532,10 +552,10 @@ class RegistroActivity: AppCompatActivity() {
             .setMessage(R.string.messageDialogUsuario)
             .setNeutralButton(R.string.dialog_cancelar, null)
             .setPositiveButton(R.string.insertar_galeria) { dialog, which ->
-                crearDialogCamara(REQUEST_CODE_DIALOG_GALERIA)
+                crearDialogCamara(REQUEST_CODE_INSERTAR_GALERIA)
             }
             .setNegativeButton(R.string.cambiar_foto) { dialog, which ->
-                crearDialogCamara(REQUEST_CODE_DIALOG_CAMARA)
+                crearDialogCamara(REQUEST_CODE_CAMBIAR_AVATAR)
             }
             .show()
     }
@@ -592,10 +612,10 @@ class RegistroActivity: AppCompatActivity() {
     private fun abrirCamara(requestCode: Int) {
         intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
-        if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
+        if(requestCode == REQUEST_CODE_CAMARA_AVATAR) {
             launcherAvatarCamara.launch(intent)
         }
-        if(requestCode == REQUEST_CODE_DIALOG_GALERIA){
+        if(requestCode == REQUEST_CODE_CAMARA_GALERIA){
             launcherGaleriaCamara.launch(intent)
         }
 
@@ -607,10 +627,10 @@ class RegistroActivity: AppCompatActivity() {
             setAction(Intent.ACTION_GET_CONTENT)
         }
 
-        if(requestCode == REQUEST_CODE_DIALOG_CAMARA) {
+        if(requestCode == REQUEST_CODE_GALERIA_AVATAR) {
             launcherAvatarGaleria.launch(intent)
         }
-        if(requestCode == REQUEST_CODE_DIALOG_GALERIA) {
+        if(requestCode == REQUEST_CODE_GALERIA_GALERIA) {
             launcherGaleriaGaleria.launch(intent)
         }
     }
@@ -619,15 +639,28 @@ class RegistroActivity: AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_CODE_PERMISO_LOCALIZACION)
     }
 
-    private fun pedirPermisoCamara() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CODE_PERMISO_CAMARA)
+    private fun pedirPermisoCamara(requestCode: Int) {
+        if(requestCode == REQUEST_CODE_CAMARA_AVATAR) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), requestCode)
+        } else if(requestCode == REQUEST_CODE_CAMARA_GALERIA) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), requestCode)
+        }
     }
 
-    private fun pedirPermisoGaleria() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), REQUEST_CODE_PERMISO_GALERIA)
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE_PERMISO_GALERIA)
+    private fun pedirPermisoGaleria(requestCode: Int) {
+
+        if(requestCode == REQUEST_CODE_GALERIA_GALERIA) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), requestCode)
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), requestCode)
+            }
+        } else if(requestCode == REQUEST_CODE_GALERIA_AVATAR) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_IMAGES), requestCode)
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), requestCode)
+            }
         }
     }
 
@@ -664,10 +697,14 @@ class RegistroActivity: AppCompatActivity() {
                     .setCancelable(false)
                     .show()
             }
-        } else if(requestCode == REQUEST_CODE_PERMISO_CAMARA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            abrirCamara(REQUEST_CODE_DIALOG_CAMARA)
-        } else if(requestCode == REQUEST_CODE_PERMISO_GALERIA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            abrirGaleria(REQUEST_CODE_DIALOG_GALERIA)
+        } else if(requestCode == REQUEST_CODE_CAMARA_AVATAR && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            abrirCamara(requestCode)
+        } else if(requestCode == REQUEST_CODE_CAMARA_GALERIA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            abrirCamara(requestCode)
+        } else if(requestCode == REQUEST_CODE_GALERIA_AVATAR && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            abrirGaleria(requestCode)
+        } else if(requestCode == REQUEST_CODE_GALERIA_GALERIA && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            abrirGaleria(requestCode)
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

@@ -11,7 +11,7 @@ import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 
 class GaleriaActivity: AppCompatActivity(){
-    lateinit var binding: GaleriaLayoutBinding
+    private lateinit var binding: GaleriaLayoutBinding
     private val usuarioBBDD by lazy { UsuarioBBDD(this) }
     private var bundleRecogida: Bundle ?= null
     private var usuario: UsuarioEntidad ?= null
