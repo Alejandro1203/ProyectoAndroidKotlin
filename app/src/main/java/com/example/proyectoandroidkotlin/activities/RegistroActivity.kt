@@ -69,8 +69,6 @@ class RegistroActivity: AppCompatActivity() {
         private const val REQUEST_CODE_CAMARA_GALERIA = 4002
         private const val REQUEST_CODE_GALERIA_GALERIA = 4003
         private const val REQUEST_CODE_PERMISO_LOCALIZACION = 100
-        private const val REQUEST_CODE_PERMISO_CAMARA = 200
-        private const val REQUEST_CODE_PERMISO_GALERIA = 300
         private val formatoUltimaModificacion = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
         private val calendar: Calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"))
     }

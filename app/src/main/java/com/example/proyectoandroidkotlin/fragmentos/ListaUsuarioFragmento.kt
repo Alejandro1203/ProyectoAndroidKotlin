@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.activities.LoginActivity
 import com.example.proyectoandroidkotlin.activities.RegistroActivity
@@ -29,7 +30,10 @@ import com.example.proyectoandroidkotlin.databinding.RecyclerBinding
 import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.example.proyectoandroidkotlin.viewmodel.UsuarioViewModel
+import com.google.android.material.badge.BadgeDrawable
+import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputLayout
 
 class ListaUsuarioFragmento: Fragment() {
@@ -86,6 +90,33 @@ class ListaUsuarioFragmento: Fragment() {
 
         usuarioViewModel?.getListaUsuarios()?.observe(viewLifecycleOwner) { usuarios ->
             listaUsuarios = ArrayList(usuarios)
+
+            val tabLayout = requireActivity().findViewById<TabLayout>(R.id.tabLayout)
+
+            if(usuarioLogin?.rol == 1) {
+                when(userType) {
+                    "ADMIN" -> {
+                        val tab = tabLayout.getTabAt(0)
+                        val badge = tab?.orCreateBadge
+                        badge?.number = listaUsuarios.count { it.rol == 1 && it.baja == 0}
+                    }
+                    "NORMAL" -> {
+                        val tab = tabLayout.getTabAt(1)
+                        val badge = tab?.orCreateBadge
+                        badge?.number = listaUsuarios.count { it.rol == 2 && it.baja == 0}
+                    }
+                    "BAJA" -> {
+                        val tab = tabLayout.getTabAt(2)
+                        val badge = tab?.orCreateBadge
+                        badge?.number = listaUsuarios.count { it.baja == 1}
+                    }
+                }
+            } else {
+                val tab = tabLayout.getTabAt(0)
+                val badge = tab?.orCreateBadge
+                badge?.number = listaUsuarios.count { it.rol == 2 && it.baja == 0}
+            }
+
             updateRecyclerView()
         }
 
