@@ -11,12 +11,16 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationCompat
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,10 +51,12 @@ class ListaUsuarioFragmento: Fragment() {
     private var usuarioViewModel: UsuarioViewModel ?= null
     private var recyclerViewAdaptador: RecyclerViewAdaptador ?= null
     private var listaUsuarios: ArrayList<UsuarioEntidad> = arrayListOf()
+    private var listaUsuariosCheckeados: ArrayList<UsuarioEntidad> = arrayListOf()
     private var userType: String = ""
     private var usuario: UsuarioEntidad ?= null
     private var usuarioLogin: UsuarioEntidad ?= null
     private var bundleEnvio: Bundle = Bundle()
+    private var contadorCheck: Int = 0
 
 
     fun newInstance(userType: String, usuario: UsuarioEntidad?): ListaUsuarioFragmento {
@@ -121,6 +127,26 @@ class ListaUsuarioFragmento: Fragment() {
         }
 
         usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
+
+        if(usuarioLogin?.rol == 1) {
+            requireActivity().addMenuProvider(object: MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menu.clear()
+                    menuInflater.inflate(R.menu.menu, menu)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    if(contadorCheck > 0) {
+                        if(menuItem.itemId == R.id.abrir_bottom_sheet) {
+                            mostrarBottomSheet()
+                            return true
+                        }
+                    }
+
+                    return false
+                }
+            }, viewLifecycleOwner)
+        }
     }
 
     override fun onResume() {
@@ -138,7 +164,6 @@ class ListaUsuarioFragmento: Fragment() {
             override fun afterTextChanged(s: Editable?) {
 
             }
-
         })
     }
 
@@ -158,6 +183,18 @@ class ListaUsuarioFragmento: Fragment() {
 
                 return true
             }
+
+            override fun onCheckChangeListener(position: Int, isChecked: Boolean) {
+                usuario = listaUsuarios[position]
+
+                if(isChecked) {
+                    usuario?.let { listaUsuariosCheckeados.add(it) }
+                    contadorCheck++
+                } else {
+                    usuario?.let { listaUsuariosCheckeados.remove(it) }
+                    contadorCheck--
+                }
+            }
         })
 
         binding.recyclerView.apply {
@@ -165,6 +202,28 @@ class ListaUsuarioFragmento: Fragment() {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
             adapter = recyclerViewAdaptador
         }
+    }
+
+    private fun mostrarBottomSheet() {
+        val bundle = Bundle().apply {
+            putInt("contador", contadorCheck)
+        }
+
+        val bottomSheetFragmento = BottomSheetFragmento().apply {
+            arguments = bundle
+
+            setBottomSheetListener(object: BottomSheetFragmento.BottomSheetInterfaz {
+                override fun onEditarListener() {
+                    launcherEditar.launch(intentEditar(listaUsuariosCheckeados[0]))
+                }
+
+                override fun onEliminarListener() {
+                    crearDialogConfirmacion(listaUsuariosCheckeados)
+                }
+            })
+        }
+
+        bottomSheetFragmento.show(parentFragmentManager, tag)
     }
 
     private fun intentEditar(usuario: UsuarioEntidad?): Intent {
@@ -207,6 +266,23 @@ class ListaUsuarioFragmento: Fragment() {
                     Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
                     crearNotificacion(usuario)
                     usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
+                }
+            }
+            .show()
+    }
+
+    private fun crearDialogConfirmacion(usuarios: ArrayList<UsuarioEntidad>) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(context?.getString(R.string.dialog_confirmacion))
+            .setNeutralButton(context?.getString(R.string.dialog_cancelar), null)
+            .setNegativeButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
+
+                for(usuario in usuarios) {
+                    if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
+                        Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
+                        crearNotificacion(usuario)
+                        usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
+                    }
                 }
             }
             .show()

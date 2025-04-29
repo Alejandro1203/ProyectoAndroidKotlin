@@ -93,6 +93,10 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
             if(!esAdministrador) {
                 binding.check.visibility = GONE
             }
+
+            binding.check.setOnCheckedChangeListener { buttonView, isChecked ->
+                adaptadorInterfaz.onCheckChangeListener(position, isChecked)
+            }
         }
 
         private fun getRolById(id: Int): String {
@@ -104,6 +108,6 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
     interface AdaptadorInterfaz {
         fun onClickListener(position: Int)
         fun onLongClickListener(position: Int): Boolean
+        fun onCheckChangeListener(position: Int, isChecked: Boolean)
     }
 }
-
