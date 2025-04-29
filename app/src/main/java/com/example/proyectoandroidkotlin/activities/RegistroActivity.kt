@@ -23,6 +23,8 @@ import android.util.Patterns
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -98,6 +100,11 @@ class RegistroActivity: AppCompatActivity() {
     private var usuarioEditar: UsuarioEntidad ?= null
     private var usuarioEditor: UsuarioEntidad ?= null
     private var estaModificando = false
+    private var isExpanded = false
+    private val animacionExpandirFab: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.expandir_fab) }
+    private val animacionColapsarFab: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.colapsar_fab) }
+    private val rotateClockWiseAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_clock_wise) }
+    private val rotateAntiClockWiseAnimation: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_ati_clock_wise) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,14 +146,6 @@ class RegistroActivity: AppCompatActivity() {
         binding.btnMapa.setOnClickListener {
             if (estaModificando) {
                 abrirMapa()
-            }
-        }
-
-        binding.btnFoto.setOnClickListener {
-            if (estaModificando) {
-                crearDialogOpcionesImagenes()
-            } else {
-                crearDialogCamara(REQUEST_CODE_CAMBIAR_AVATAR)
             }
         }
 
@@ -257,6 +256,23 @@ class RegistroActivity: AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
+        }
+
+        binding.fabPrincipal.setOnClickListener {
+
+            if(isExpanded) {
+                colapsarFab()
+            } else {
+                expandirFab()
+            }
+        }
+
+        binding.fabAvatar.setOnClickListener {
+            crearDialogCamara(REQUEST_CODE_CAMBIAR_AVATAR)
+        }
+
+        binding.fabGaleria.setOnClickListener {
+            crearDialogOpcionesImagenes()
         }
     }
 
@@ -486,6 +502,33 @@ class RegistroActivity: AppCompatActivity() {
         binding.datePicker.editText?.setText(usuarioEditar?.fechaNacimiento)
         usuarioEditar?.rol?.let { binding.spinner.setSelection(it - 1) }
         binding.btnRegistrar.text = getString(R.string.btn_actualizar)
+    }
+
+    private fun estaExpandido(visibilidad: Int, animacionFabPrincipal: Animation, animacionFabsSecundarios: Animation, isClickable: Boolean) {
+        binding.fabPrincipal.startAnimation(animacionFabPrincipal)
+        binding.fabAvatar.visibility = visibilidad
+        binding.fabAvatar.startAnimation(animacionFabsSecundarios)
+        binding.fabAvatar.isClickable = isClickable
+
+        if(estaModificando) {
+            binding.fabGaleria.visibility = visibilidad
+            binding.fabMapa.visibility = visibilidad
+            binding.fabGaleria.startAnimation(animacionFabsSecundarios)
+            binding.fabMapa.startAnimation(animacionFabsSecundarios)
+            binding.fabGaleria.isClickable = isClickable
+            binding.fabMapa.isClickable = isClickable
+        }
+
+        isExpanded = !isExpanded
+
+    }
+
+    private fun colapsarFab() {
+        estaExpandido(GONE, rotateAntiClockWiseAnimation, animacionColapsarFab, false)
+    }
+
+    private fun expandirFab() {
+        estaExpandido(VISIBLE, rotateClockWiseAnimation, animacionExpandirFab, true)
     }
 
     private fun obtenerUsuarioSerializable(key: String): UsuarioEntidad? {

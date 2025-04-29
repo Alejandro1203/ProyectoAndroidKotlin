@@ -95,4 +95,8 @@
     <string name="bajas">Bajas</string>
     <string name="seleccionar_todos">Seleccionar todos</string>
     <string name="bottomsheet">BottomSheet</string>
+    <string name="fab_principal">FAB principal</string>
+    <string name="fab_para_cambiar_la_foto_del_usuario">FAB para cambiar la foto del usuario</string>
+    <string name="fab_para_insertar_fotos_en_galer_a">FAB para insertar fotos en galería</string>
+    <string name="fab_para_ver_el_mapa">FAB para ver el mapa</string>
 </resources>

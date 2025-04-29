@@ -184,4 +184,66 @@
         android:layout_marginTop="20dp"
         android:paddingBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabGaleria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/fabPrincipal"
+                app:layout_constraintEnd_toEndOf="@+id/fabPrincipal"
+                app:layout_constraintStart_toStartOf="@id/fabPrincipal"
+                app:layout_constraintBottom_toTopOf="@id/fabPrincipal"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/fab_para_insertar_fotos_en_galer_a"
+                app:srcCompat="@drawable/anadir_imagen"
+                android:visibility="gone"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabAvatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/fabPrincipal"
+                app:layout_constraintEnd_toEndOf="@+id/fabPrincipal"
+                app:layout_constraintBottom_toTopOf="@id/fabGaleria"
+                app:layout_constraintStart_toStartOf="@id/fabPrincipal"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/fab_para_cambiar_la_foto_del_usuario"
+                app:srcCompat="@drawable/cambiar_avatar"
+                android:visibility="gone"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabMapa"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/fabPrincipal"
+                app:layout_constraintEnd_toEndOf="@+id/fabPrincipal"
+                app:layout_constraintBottom_toTopOf="@id/fabAvatar"
+                app:layout_constraintStart_toStartOf="@id/fabPrincipal"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/fab_para_ver_el_mapa"
+                app:srcCompat="@drawable/mapa"
+                android:visibility="gone"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                app:shapeAppearanceOverlay="@style/fab_3_rounded"
+                android:id="@+id/fabPrincipal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/fab_principal"
+                app:srcCompat="@drawable/baseline_add_24"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
