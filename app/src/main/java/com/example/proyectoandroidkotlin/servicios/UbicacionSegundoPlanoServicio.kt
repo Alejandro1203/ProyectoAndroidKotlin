@@ -27,7 +27,7 @@ class UbicacionSegundoPlanoServicio: Service() {
         private const val DESCRIPCION_NOTIFICACION = "Ubicacion en segundo plano"
         private const val IMPORTANCIA_NOTIFICACION = NotificationManager.IMPORTANCE_HIGH
         private const val ID_CANAL = "ID_UBI"
-        private const val ID_NOTIFICACION = -1
+        private const val ID_NOTIFICACION = 10000
     }
 
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
@@ -37,6 +37,7 @@ class UbicacionSegundoPlanoServicio: Service() {
     override fun onCreate() {
         super.onCreate()
         crearCanalNotificacion()
+        crearNotificacion("...", "..g.")
 
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {

@@ -1,5 +1,6 @@
 package com.example.proyectoandroidkotlin.activities
 
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -34,6 +35,10 @@ class GaleriaActivity: AppCompatActivity(){
 
             binding.dots.setViewPager(binding.galeria)
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
     }
 
     private fun obtenerUsuarioSerializable(key: String): UsuarioEntidad? {

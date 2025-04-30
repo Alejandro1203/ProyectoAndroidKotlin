@@ -83,29 +83,29 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
             put(COLUMNA_FOTO_PERFIL, usuario.fotoPerfil)
             put(COLUMNA_BAJA, usuario.baja)
             put(COLUMNA_GALERIA, usuario.galeria)
-            put(COLUMNA_ULTIMA_MODIFICACION, usuario.ultimaModificacion);
+            put(COLUMNA_ULTIMA_MODIFICACION, usuario.ultimaModificacion)
             put(COLUMNA_LATITUD, usuario.latitud)
             put(COLUMNA_LONGITUD, usuario.longitud)
         }
     }
 
-    fun getAllUsuarios(): ArrayList<UsuarioEntidad> {
-        val query = "SELECT * FROM $TABLA_NOMBRE"
-
-        try {
-            readableDatabase.use { db ->
-                db.rawQuery(query, null).use { cursor ->
-                    while (cursor.moveToNext()) {
-                        listaUsuarios.add(crearUsuarioByCursor(cursor))
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(context.getString(R.string.error_Usuario), context.getString(R.string.metodo_getAllUsuarios) + ": ", e)
-        }
-
-        return listaUsuarios
-    }
+//    fun getAllUsuarios(): ArrayList<UsuarioEntidad> {
+//        val query = "SELECT * FROM $TABLA_NOMBRE"
+//
+//        try {
+//            readableDatabase.use { db ->
+//                db.rawQuery(query, null).use { cursor ->
+//                    while (cursor.moveToNext()) {
+//                        listaUsuarios.add(crearUsuarioByCursor(cursor))
+//                    }
+//                }
+//            }
+//        } catch (e: Exception) {
+//            Log.e(context.getString(R.string.error_Usuario), context.getString(R.string.metodo_getAllUsuarios) + ": ", e)
+//        }
+//
+//        return listaUsuarios
+//    }
 
     fun getAllUsuariosBaja(): ArrayList<UsuarioEntidad> {
         val query = "SELECT * FROM $TABLA_NOMBRE WHERE $COLUMNA_BAJA=1"
@@ -208,7 +208,7 @@ class UsuarioBBDD(val context: Context): SQLiteOpenHelper(context, DATABASE_NOMB
             readableDatabase.use { db ->
                 db.rawQuery(query, arrayOf(id.toString())).use { cursor ->
                     return if(cursor.moveToNext()) {
-                        cursor.getInt(0) != 0;
+                        cursor.getInt(0) != 0
                     } else {
                         false
                     }

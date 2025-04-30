@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -22,7 +23,7 @@ class InicioActivity: AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE_PERMISO_NOTIFICACION = 500
-        private const val REQUEST_CODE_BACKGROUND_LOCATION = 7000;
+        private const val REQUEST_CODE_BACKGROUND_LOCATION = 7000
     }
 
     private val binding by lazy { InicioLayoutBinding.inflate(layoutInflater) }
@@ -88,9 +89,14 @@ class InicioActivity: AppCompatActivity() {
         usuario?.let { usuario -> setViewPagerAdapter(usuario) }
     }
 
+    @SuppressLint("ImplicitSamInstance")
     override fun onDestroy() {
         super.onDestroy()
         stopService(Intent(this, UbicacionSegundoPlanoServicio::class.java))
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
     }
 
     private fun setViewPagerAdapter(usuario: UsuarioEntidad) {
@@ -111,7 +117,7 @@ class InicioActivity: AppCompatActivity() {
     }
 
     private fun pedirPermisoBackGround() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), REQUEST_CODE_BACKGROUND_LOCATION);
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), REQUEST_CODE_BACKGROUND_LOCATION)
     }
 
     private fun tienePermisoBackGround(): Boolean {
@@ -128,7 +134,7 @@ class InicioActivity: AppCompatActivity() {
         if (requestCode == REQUEST_CODE_BACKGROUND_LOCATION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startForegroundService(Intent(this, UbicacionSegundoPlanoServicio::class.java))
         } else {
-            pedirPermisoBackGround();
+            pedirPermisoBackGround()
         }
     }
 }

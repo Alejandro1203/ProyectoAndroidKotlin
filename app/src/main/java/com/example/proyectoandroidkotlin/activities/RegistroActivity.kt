@@ -385,6 +385,7 @@ class RegistroActivity: AppCompatActivity() {
             LocalDate.parse(fecha, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
             return true
         } catch (e: DateTimeParseException) {
+            Log.e("FAllo", e.toString())
             Snackbar.make(binding.snackbar, R.string.error_formato_fecha, Snackbar.LENGTH_SHORT).show()
             return false
         }

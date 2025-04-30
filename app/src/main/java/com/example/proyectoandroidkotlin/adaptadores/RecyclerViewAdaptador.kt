@@ -75,9 +75,7 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
                 listaFiltrada = results.values as ArrayList<UsuarioEntidad>
                 notifyDataSetChanged()
             }
-
         }
-
     }
 
     inner class ViewHolderUsuario(val binding: UsuarioBinding, val context: Context, val esAdministrador: Boolean): RecyclerView.ViewHolder(binding.root) {

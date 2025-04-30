@@ -1,6 +1,7 @@
 package com.example.proyectoandroidkotlin.activities
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -77,6 +78,10 @@ class LoginActivity: AppCompatActivity() {
             startActivity(Intent(this, RegistroActivity::class.java))
             finish()
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
     }
 
     private fun camposRellenos(): Boolean {

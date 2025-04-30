@@ -102,12 +102,12 @@ class ListaUsuarioFragmento: Fragment() {
                     "ADMIN" -> {
                         val tab = tabLayout.getTabAt(0)
                         val badge = tab?.orCreateBadge
-                        badge?.number = listaUsuarios.count { it.rol == 1 && it.baja == 0}
+                        badge?.number = listaUsuarios.count { usuario -> usuario.rol == 1 && usuario.baja == 0}
                     }
                     "NORMAL" -> {
                         val tab = tabLayout.getTabAt(1)
                         val badge = tab?.orCreateBadge
-                        badge?.number = listaUsuarios.count { it.rol == 2 && it.baja == 0}
+                        badge?.number = listaUsuarios.count { usuario -> usuario.rol == 2 && usuario.baja == 0}
                     }
                     "BAJA" -> {
                         val tab = tabLayout.getTabAt(2)
