@@ -143,12 +143,6 @@ class RegistroActivity: AppCompatActivity() {
             }
         }
 
-        binding.btnMapa.setOnClickListener {
-            if (estaModificando) {
-                abrirMapa()
-            }
-        }
-
         binding.btnRegistrar.setOnClickListener {
             if (camposRellenos()) {
                 nombre = binding.edtNombre.editText?.text.toString().trim()
@@ -273,6 +267,12 @@ class RegistroActivity: AppCompatActivity() {
 
         binding.fabGaleria.setOnClickListener {
             crearDialogOpcionesImagenes()
+        }
+
+        binding.fabMapa.setOnClickListener {
+            if (estaModificando) {
+                abrirMapa()
+            }
         }
     }
 
@@ -482,7 +482,6 @@ class RegistroActivity: AppCompatActivity() {
 
     private fun setVistaEdicion() {
         binding.txtUltimaModificacion.visibility = VISIBLE
-        binding.btnMapa.visibility = VISIBLE
         binding.txtIniciado.visibility = GONE
 
         if(usuarioEditor?.rol == 2 || (usuarioEditor == usuarioEditar)) {
