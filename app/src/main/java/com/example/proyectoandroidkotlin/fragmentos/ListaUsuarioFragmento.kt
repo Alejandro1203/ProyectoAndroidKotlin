@@ -24,7 +24,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewpager2.widget.ViewPager2
 import com.example.proyectoandroidkotlin.R
 import com.example.proyectoandroidkotlin.activities.LoginActivity
 import com.example.proyectoandroidkotlin.activities.RegistroActivity
@@ -34,8 +33,6 @@ import com.example.proyectoandroidkotlin.databinding.RecyclerBinding
 import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 import com.example.proyectoandroidkotlin.viewmodel.UsuarioViewModel
-import com.google.android.material.badge.BadgeDrawable
-import com.google.android.material.badge.BadgeUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.textfield.TextInputLayout
@@ -44,6 +41,7 @@ class ListaUsuarioFragmento: Fragment() {
 
     companion object {
         private const val MOD_USER = 1000
+        private const val ID_NOTIFICACION = 1
     }
 
     private lateinit var binding: RecyclerBinding
@@ -76,7 +74,7 @@ class ListaUsuarioFragmento: Fragment() {
             userType = requireArguments().getString("USER_TYPE", "")
 
             usuarioLogin = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arguments?.getSerializable("USUARIO", UsuarioEntidad::class.java)!!
+                arguments?.getSerializable("USUARIO", UsuarioEntidad::class.java)
             } else {
                 @Suppress("DEPRECATION")
                 arguments?.getSerializable("USUARIO") as UsuarioEntidad
@@ -179,7 +177,12 @@ class ListaUsuarioFragmento: Fragment() {
 
             override fun onLongClickListener(position: Int): Boolean {
                 usuario = listaUsuarios[position]
-                crearDialogOpciones(usuario)
+
+                if(usuario?.id == usuarioLogin?.id) {
+                    launcherEditar.launch(intentEditar(usuario))
+                } else {
+                    crearDialogOpciones(usuario)
+                }
 
                 return true
             }
@@ -187,12 +190,14 @@ class ListaUsuarioFragmento: Fragment() {
             override fun onCheckChangeListener(position: Int, isChecked: Boolean) {
                 usuario = listaUsuarios[position]
 
-                if(isChecked) {
-                    usuario?.let { listaUsuariosCheckeados.add(it) }
-                    contadorCheck++
-                } else {
-                    usuario?.let { listaUsuariosCheckeados.remove(it) }
-                    contadorCheck--
+                usuario?.let { usuario ->
+                    if(isChecked) {
+                        listaUsuariosCheckeados.add(usuario)
+                        contadorCheck++
+                    } else {
+                        listaUsuariosCheckeados.remove(usuario)
+                        contadorCheck--
+                    }
                 }
             }
         })
@@ -247,7 +252,7 @@ class ListaUsuarioFragmento: Fragment() {
             .setMessage(context?.getString(R.string.messageDialogUsuario))
             .setNeutralButton(context?.getString(R.string.dialog_cancelar), null)
             .setPositiveButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
-                usuario?.let {
+                usuario?.let { usuario ->
                     crearDialogConfirmacion(usuario)
                 }
             }
@@ -264,7 +269,7 @@ class ListaUsuarioFragmento: Fragment() {
             .setNegativeButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
                 if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
                     Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
-                    crearNotificacion(usuario)
+                    crearNotificacion(usuario, ID_NOTIFICACION)
                     usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
                 }
             }
@@ -277,10 +282,13 @@ class ListaUsuarioFragmento: Fragment() {
             .setNeutralButton(context?.getString(R.string.dialog_cancelar), null)
             .setNegativeButton(context?.getString(R.string.dialog_eliminar)) { dialog, which ->
 
+                var idNotificacion = ID_NOTIFICACION
+
                 for(usuario in usuarios) {
                     if(usuarioBBDD.eliminarUsuarioById(usuario.id)) {
+                        idNotificacion++
                         Toast.makeText(requireContext(), context?.getString(R.string.usuario_eliminado), Toast.LENGTH_SHORT).show()
-                        crearNotificacion(usuario)
+                        crearNotificacion(usuario, idNotificacion)
                         usuarioViewModel?.cargarListaUsuarios(userType, requireContext())
                     }
                 }
@@ -288,7 +296,7 @@ class ListaUsuarioFragmento: Fragment() {
             .show()
     }
 
-    private fun crearNotificacion(usuario: UsuarioEntidad) {
+    private fun crearNotificacion(usuario: UsuarioEntidad, idNotificacion: Int) {
         val canalNombre = "CANAL_NOMBRE"
         val descripcion = "Eliminado"
         val importancia = NotificationManager.IMPORTANCE_HIGH
@@ -315,6 +323,6 @@ class ListaUsuarioFragmento: Fragment() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
 
-        notificationManager.notify(1, builder.build())
+        notificationManager.notify(idNotificacion, builder.build())
     }
 }

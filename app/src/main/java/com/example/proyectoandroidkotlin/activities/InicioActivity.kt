@@ -64,7 +64,7 @@ class InicioActivity: AppCompatActivity() {
                 null
             }
 
-            usuario?.let { setViewPagerAdapter(it) }
+            usuario?.let { usuario -> setViewPagerAdapter(usuario) }
         }
 
         TabLayoutMediator(binding.tabLayout, binding.viewpager) { tab, position ->
@@ -85,7 +85,7 @@ class InicioActivity: AppCompatActivity() {
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onResume() {
         super.onResume()
-        usuario?.let { setViewPagerAdapter(it) }
+        usuario?.let { usuario -> setViewPagerAdapter(usuario) }
     }
 
     override fun onDestroy() {

@@ -11,14 +11,13 @@ import com.example.proyectoandroidkotlin.entidades.UsuarioEntidad
 import com.example.proyectoandroidkotlin.tablasBBDD.UsuarioBBDD
 
 class GaleriaActivity: AppCompatActivity(){
-    private lateinit var binding: GaleriaLayoutBinding
+    private val binding by lazy { GaleriaLayoutBinding.inflate(layoutInflater) }
     private val usuarioBBDD by lazy { UsuarioBBDD(this) }
     private var bundleRecogida: Bundle ?= null
     private var usuario: UsuarioEntidad ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = GaleriaLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         bundleRecogida = intent.extras
@@ -26,8 +25,12 @@ class GaleriaActivity: AppCompatActivity(){
         if(bundleRecogida != null) {
             usuario = obtenerUsuarioSerializable("usuarioEditar")
 
-            val galeriaUsuario = usuario?.let { obtenerGaleriaUsuario(it) }
-            binding.galeria.adapter = usuario?.nombre?.let { galeriaUsuario?.let { listaImagenes -> GaleriaAdaptador(it, listaImagenes) } }
+            val galeriaUsuario = usuario?.let { usuario -> obtenerGaleriaUsuario(usuario) }
+            binding.galeria.adapter = usuario?.nombre?.let { nombre ->
+                galeriaUsuario?.let { listaImagenes ->
+                    GaleriaAdaptador(nombre, listaImagenes)
+                }
+            }
 
             binding.dots.setViewPager(binding.galeria)
         }

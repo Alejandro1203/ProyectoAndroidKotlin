@@ -50,8 +50,8 @@ class RecyclerViewAdaptador(val context: Context, val listaUsuarios: ArrayList<U
             override fun performFiltering(constraint: CharSequence?): FilterResults? {
                 var filtro = constraint.toString().lowercase().trim()
 
-                filtro.let {
-                    if(it.isNotEmpty()) {
+                filtro.let { filtro ->
+                    if(filtro.isNotEmpty()) {
                         var nuevaListaFiltrada: ArrayList<UsuarioEntidad> = arrayListOf()
 
                         for(usuario in listaUsuarios) {

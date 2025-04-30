@@ -146,7 +146,7 @@
         android:layout_height="wrap_content"
         android:text="@string/registrar"
         app:layout_constraintTop_toBottomOf="@id/switchBaja"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -158,7 +158,8 @@
         app:layout_constraintTop_toBottomOf="@id/btnRegistrar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
         android:paddingBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

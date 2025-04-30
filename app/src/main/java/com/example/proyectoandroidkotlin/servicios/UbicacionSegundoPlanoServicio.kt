@@ -27,7 +27,7 @@ class UbicacionSegundoPlanoServicio: Service() {
         private const val DESCRIPCION_NOTIFICACION = "Ubicacion en segundo plano"
         private const val IMPORTANCIA_NOTIFICACION = NotificationManager.IMPORTANCE_HIGH
         private const val ID_CANAL = "ID_UBI"
-        private const val ID_NOTIFICACION = 2
+        private const val ID_NOTIFICACION = -1
     }
 
     private val fusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
@@ -41,9 +41,9 @@ class UbicacionSegundoPlanoServicio: Service() {
         locationCallback = object: LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
 
-                locationResult.lastLocation?.let {
-                    val latitud = it.latitude.toString()
-                    val longitud = it.longitude.toString()
+                locationResult.lastLocation?.let { location ->
+                    val latitud = location.latitude.toString()
+                    val longitud = location.longitude.toString()
 
                     crearNotificacion(latitud, longitud)
                 }
@@ -57,7 +57,7 @@ class UbicacionSegundoPlanoServicio: Service() {
         }.build()
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationCallback?.let { fusedLocationProviderClient.requestLocationUpdates(locationRequest, it, Looper.getMainLooper()) }
+            locationCallback?.let { location -> fusedLocationProviderClient.requestLocationUpdates(locationRequest, location, Looper.getMainLooper()) }
         }
     }
 
@@ -67,7 +67,7 @@ class UbicacionSegundoPlanoServicio: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        locationCallback?.let { fusedLocationProviderClient.removeLocationUpdates(it) }
+        locationCallback?.let { location -> fusedLocationProviderClient.removeLocationUpdates(location) }
     }
 
     private fun crearCanalNotificacion() {

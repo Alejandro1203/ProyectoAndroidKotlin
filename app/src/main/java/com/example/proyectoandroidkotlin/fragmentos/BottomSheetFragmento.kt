@@ -20,8 +20,10 @@ class BottomSheetFragmento(): BottomSheetDialogFragment() {
         binding = BottomSheetBinding.inflate(layoutInflater)
         val menu = binding.bottomSheet.menu
         val editar = menu.findItem(R.id.opcionEditar)
+        var contador = arguments?.getInt("contador", 0) ?: 0
 
-        editar.isVisible = !(arguments != null && arguments?.getInt("contador")!! > 1)
+        editar.isVisible = !(arguments != null && contador > 1)
+
         binding.bottomSheet.setNavigationItemSelectedListener { item ->
             val id = item.itemId
 

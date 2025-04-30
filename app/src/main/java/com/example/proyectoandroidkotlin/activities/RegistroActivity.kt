@@ -129,10 +129,10 @@ class RegistroActivity: AppCompatActivity() {
 
         binding.iconoUsuario.setOnClickListener {
             if (estaModificando) {
-                usuarioEditar?.let { it ->
-                    if(usuarioBBDD.getGaleriaById(it.id) != "") {
+                usuarioEditar?.let { usuario ->
+                    if(usuarioBBDD.getGaleriaById(usuario.id) != "") {
                         intent = Intent(this, GaleriaActivity::class.java)
-                        bundleEnvio.putSerializable("usuarioEditar", usuarioEditar)
+                        bundleEnvio.putSerializable("usuarioEditar", usuario)
                         intent.putExtras(bundleEnvio)
                         startActivity(intent)
                     } else {
@@ -159,6 +159,7 @@ class RegistroActivity: AppCompatActivity() {
                             ).show()
                         } else {
                             contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
+                            calendar.timeInMillis = System.currentTimeMillis()
                             ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
                             baja = 0
 
@@ -168,6 +169,7 @@ class RegistroActivity: AppCompatActivity() {
                         }
                     } else {
                         contrasenya = binding.edtContrasenya.editText?.text.toString().trim()
+                        calendar.timeInMillis = System.currentTimeMillis()
                         ultimaModificacion = formatoUltimaModificacion.format(calendar.time)
                         baja = if (binding.switchBaja.isChecked) {
                             1
@@ -189,14 +191,14 @@ class RegistroActivity: AppCompatActivity() {
 
                         val galeria = usuarioEditar?.id?.let { id -> usuarioBBDD.getGaleriaById(id) }
 
-                        val usuario = usuarioEditar?.let {
-                            UsuarioEntidad(id = usuarioEditar?.id!!, nombre = nombre, correo = correo, contrasenya = contrasenya, fechaNacimiento = fechaNacimiento,
+                        val usuario = usuarioEditar?.let { usuario ->
+                            UsuarioEntidad(id = usuario.id, nombre = nombre, correo = correo, contrasenya = contrasenya, fechaNacimiento = fechaNacimiento,
                                            rol = idRol, fotoPerfil = fotoRutaAvatar, baja = baja, galeria = galeria ?: "", ultimaModificacion = ultimaModificacion,
-                                           latitud = usuarioEditar?.latitud!!, longitud = usuarioEditar?.longitud!!)
+                                           latitud = usuario.latitud, longitud = usuario.longitud)
                         }
 
-                        usuario?.let { it ->
-                            if (usuarioBBDD.actualizarUsuario(it)) {
+                        usuario?.let { usuario ->
+                            if (usuarioBBDD.actualizarUsuario(usuario)) {
                                 Toast.makeText(this, R.string.toast_modificado, Toast.LENGTH_SHORT).show()
                                 intent = Intent()
                                 bundleEnvio.putSerializable("usuarioLogin", usuarioEditor)
@@ -266,7 +268,7 @@ class RegistroActivity: AppCompatActivity() {
         }
 
         binding.fabGaleria.setOnClickListener {
-            crearDialogOpcionesImagenes()
+            crearDialogCamara(REQUEST_CODE_INSERTAR_GALERIA)
         }
 
         binding.fabMapa.setOnClickListener {
@@ -287,8 +289,9 @@ class RegistroActivity: AppCompatActivity() {
             binding.iconoUsuario.setImageBitmap(foto)
             binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
             uriFoto = getUriFoto(applicationContext, foto)
-            if (getRutaFromUri(uriFoto) != null) {
-                fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+
+            getRutaFromUri(uriFoto)?.let { ruta ->
+                fotoRutaAvatar = ruta
             }
         }
     }
@@ -298,14 +301,14 @@ class RegistroActivity: AppCompatActivity() {
         if(result.resultCode == RESULT_OK && result.data != null && result.data!!.data != null ) {
             uriFoto = result.data!!.data
 
-            uriFoto?.let { imageDecoder(it) }
+            uriFoto?.let { uri -> imageDecoder(uri) }
 
-            if (getRutaFromUri(uriFoto) != null) {
-                fotoRutaAvatar = getRutaFromUri(uriFoto)!!
+            getRutaFromUri(uriFoto)?.let { ruta ->
+                fotoRutaAvatar = ruta
                 binding.iconoUsuario.setImageBitmap(BitmapFactory.decodeFile(fotoRutaAvatar))
                 binding.iconoUsuario.setScaleType(ImageView.ScaleType.CENTER_CROP)
-            } else {
-                Toast.makeText(this, R.string.error_cargando_imagen, Toast.LENGTH_SHORT).show()
+            }?:run {
+                Toast.makeText(this@RegistroActivity, R.string.error_cargando_imagen, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -315,10 +318,11 @@ class RegistroActivity: AppCompatActivity() {
             foto = result.data?.extras?.get("data") as? Bitmap
             uriFoto = getUriFoto(applicationContext, foto)
 
-            if(getRutaFromUri(uriFoto) != null) {
-                fotoRutaGaleria = getRutaFromUri(uriFoto)!!
-                usuarioEditar?.id?.let {
-                    if(usuarioBBDD.insertarImagenesGaleria(it, fotoRutaGaleria)) {
+            getRutaFromUri(uriFoto)?.let { ruta ->
+                fotoRutaGaleria = ruta
+
+                usuarioEditar?.id?.let { id ->
+                    if(usuarioBBDD.insertarImagenesGaleria(id, fotoRutaGaleria)) {
                         Toast.makeText(this, getString(R.string.imagen_insertada), Toast.LENGTH_SHORT).show()
                     } else {
                         Snackbar.make(binding.snackbar, R.string.imagen_no_insertada, Snackbar.LENGTH_SHORT).show()
@@ -333,11 +337,13 @@ class RegistroActivity: AppCompatActivity() {
         if(result.resultCode == RESULT_OK && result.data != null && result.data!!.data != null )  {
             uriFoto = result.data!!.data
 
-            uriFoto?.let { imageDecoder(it) }
-            if(getRutaFromUri(uriFoto) != null) {
-                fotoRutaGaleria = getRutaFromUri(uriFoto)!!
-                usuarioEditar?.id?.let {
-                    if(usuarioBBDD.insertarImagenesGaleria(it, fotoRutaGaleria)) {
+            uriFoto?.let {  uri -> imageDecoder(uri) }
+
+            getRutaFromUri(uriFoto)?.let { ruta ->
+                fotoRutaGaleria = ruta
+
+                usuarioEditar?.id?.let { id ->
+                    if(usuarioBBDD.insertarImagenesGaleria(id, fotoRutaGaleria)) {
                         Toast.makeText(this, getString(R.string.imagen_insertada), Toast.LENGTH_SHORT).show()
                     } else {
                         Snackbar.make(binding.snackbar, R.string.imagen_no_insertada, Snackbar.LENGTH_SHORT).show()
@@ -352,7 +358,7 @@ class RegistroActivity: AppCompatActivity() {
                binding.edtCorreo.editText?.text.toString().trim().isNotEmpty() &&
                binding.edtContrasenya.editText?.text.toString().trim().isNotEmpty() &&
                binding.datePicker.editText?.text.toString().trim().isNotEmpty() &&
-               fotoRutaAvatar != null
+               fotoRutaAvatar != ""
     }
 
     private fun validarNombre(nombre: String): Boolean {
@@ -440,8 +446,8 @@ class RegistroActivity: AppCompatActivity() {
 
         try {
             if (image != null) {
-                imageUri?.let { context.contentResolver.openOutputStream(it) }.use { outputStream ->
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream!!)
+                imageUri?.let { uri -> context.contentResolver.openOutputStream(uri) }.use { outputStream ->
+                    outputStream?.let { outputStream -> image.compress(Bitmap.CompressFormat.JPEG, 100, outputStream) }
                 }
             }
         } catch (e: IOException) {
@@ -462,7 +468,7 @@ class RegistroActivity: AppCompatActivity() {
         var archivoDestino = File(directorioDestino, nombreArchivo)
 
         try {
-            uri?.let { contentResolver.openInputStream(it) }.use { inputStream ->
+            uri?.let { uri -> contentResolver.openInputStream(uri) }.use { inputStream ->
                 FileOutputStream(archivoDestino).use { outputStream ->
                     var buffer = ByteArray(4096)
                     var bytesRead: Int = -1
@@ -481,10 +487,14 @@ class RegistroActivity: AppCompatActivity() {
     }
 
     private fun setVistaEdicion() {
+        usuarioEditar?.let { usuario ->
+            fotoRutaAvatar = usuario.fotoPerfil
+        }
+
         binding.txtUltimaModificacion.visibility = VISIBLE
         binding.txtIniciado.visibility = GONE
 
-        if(usuarioEditor?.rol == 2 || (usuarioEditor == usuarioEditar)) {
+        if(usuarioEditor?.rol == 2 || (usuarioEditor?.id == usuarioEditar?.id)) {
             binding.spinner.visibility = GONE
             binding.switchBaja.visibility = GONE
         } else if(usuarioEditor?.rol == 1) {
@@ -499,7 +509,7 @@ class RegistroActivity: AppCompatActivity() {
         binding.edtCorreo.editText?.setText(usuarioEditar?.correo)
         binding.edtContrasenya.editText?.setText(usuarioEditar?.contrasenya)
         binding.datePicker.editText?.setText(usuarioEditar?.fechaNacimiento)
-        usuarioEditar?.rol?.let { binding.spinner.setSelection(it - 1) }
+        usuarioEditar?.rol?.let { rol -> binding.spinner.setSelection(rol - 1) }
         binding.btnRegistrar.text = getString(R.string.btn_actualizar)
     }
 
@@ -584,19 +594,6 @@ class RegistroActivity: AppCompatActivity() {
             }
             .setNegativeButtonIcon(ContextCompat.getDrawable(this, R.drawable.galeria))
             .setPositiveButtonIcon(ContextCompat.getDrawable(this, R.drawable.camara))
-            .show()
-    }
-
-    private fun crearDialogOpcionesImagenes() {
-        MaterialAlertDialogBuilder(this)
-            .setMessage(R.string.messageDialogUsuario)
-            .setNeutralButton(R.string.dialog_cancelar, null)
-            .setPositiveButton(R.string.insertar_galeria) { dialog, which ->
-                crearDialogCamara(REQUEST_CODE_INSERTAR_GALERIA)
-            }
-            .setNegativeButton(R.string.cambiar_foto) { dialog, which ->
-                crearDialogCamara(REQUEST_CODE_CAMBIAR_AVATAR)
-            }
             .show()
     }
 

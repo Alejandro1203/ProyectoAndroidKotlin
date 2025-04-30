@@ -13,7 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlin.properties.Delegates
 
 class LoginActivity: AppCompatActivity() {
-    private lateinit var binding: LoginLayoutBinding
+    private val binding by lazy { LoginLayoutBinding.inflate(layoutInflater) }
     private var loginIntent: Intent ?= null
     private var nombre: String = ""
     private var contrasenya: String = ""
@@ -25,7 +25,6 @@ class LoginActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = LoginLayoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         bundleRecogida = intent.extras
@@ -47,7 +46,7 @@ class LoginActivity: AppCompatActivity() {
                 null
             }
 
-            usuario?.id?.let { inicioSesion(it) }
+            usuario?.id?.let { usuario -> inicioSesion(usuario) }
         }
 
         binding.btnInicioSesion.setOnClickListener { v ->
